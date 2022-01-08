@@ -26,3 +26,6 @@ https://blog.csdn.net/qq_35561281/article/details/104565826?spm=1001.2101.3001.6
 
 ## 算法人必懂的Hive知识-四道Hive面试&笔试题解析
 https://www.rdplat.com/news/31648.html
+
+## 经典的SparkSQL/Hive-SQL/MySQL面试-练习题
+https://mp.weixin.qq.com/s/ZBcGtW3rz5i7BQfuEf_x1w

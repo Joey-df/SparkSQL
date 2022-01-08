@@ -1,0 +1,5 @@
+经典的SparkSQL/Hive-SQL/MySQL面试-练习题
+https://mp.weixin.qq.com/s/ZBcGtW3rz5i7BQfuEf_x1w
+
+
+https://zhuanlan.zhihu.com/p/110819235
