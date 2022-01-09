@@ -748,3 +748,155 @@ from (
          join student
               on student.s_id = tmp3.s_id;
 ```
+
+41.查询不同课程成绩相同的学生的学生编号、课程编号、学生成绩
+```hql
+select distinct a.s_id,
+                a.c_id,
+                a.s_score
+from score a,
+     score b
+where a.c_id <> b.c_id --不同课程
+  and a.s_score = b.s_score; --成绩相同
+```
+
+42.查询每门课程成绩最好的前三名
+```hql
+--方法1
+select tmp1.*
+from (select *, row_number() over (order by s_score desc) ranking
+      from score
+      where c_id = '01') tmp1
+where tmp1.ranking <= 3
+
+union all
+
+select tmp2.*
+from (select *, row_number() over (order by s_score desc) ranking
+      from score
+      where c_id = '02') tmp2
+where tmp2.ranking <= 3
+
+union all
+
+select tmp3.*
+from (select *, row_number() over (order by s_score desc) ranking
+      from score
+      where c_id = '03') tmp3
+where tmp3.ranking <= 3;
+
+
+--方法2
+select s_id,
+       c_id,
+       s_score,
+       rk
+from (
+         select score.s_id,
+                score.c_id,
+                score.s_score,
+                row_number() over (partition by c_id order by s_score desc) rk
+         from score
+     ) tmp
+where rk <= 3
+order by s_id, rk;
+```
+
+43.统计每门课程的学生选修人数（超过5人的课程才统计）
+```hql
+-- 统计每门课程的学生选修人数（超过5人的课程才统计）
+-- 要求输出课程号和选修人数，查询结果按人数降序排列，若人数相同，按课程号升序排列
+select distinct course.c_id,
+                tmp.num
+from course
+         join
+     (
+         select c_id,
+                count(1) as num
+         from score
+         group by c_id
+         having count(1) >= 5
+     ) tmp
+order by tmp.num desc, course.c_id asc; -- 按人数降序排列，若人数相同，按课程号升序排列
+```
+
+44.检索至少选修两门课程的学生学号
+```hql
+select s_id,
+       count(c_id) as totalCourse
+from score
+group by s_id
+having count(c_id) >= 2;
+```
+
+45.查询选修了全部课程的学生信息
+```hql
+--方法1
+select student.*
+from student,
+     (
+         select s_id,
+                count(c_id) as totalCourse
+         from score
+         group by s_id
+     ) tmp
+where student.s_id = tmp.s_id
+  and totalCourse = 3;
+
+--方法2
+select s.*
+from student s
+         join
+     (
+         select s_id,
+                count(c_id)
+         from score
+         group by s_id
+         having count(c_id) = 3
+     ) tmp
+     on s.s_id = tmp.s_id;
+
+--方法3
+select s.*
+from student s
+where s.s_id in (
+    select s_id,
+           count(c_id) selectedNum
+    from score
+    group by s_id
+    having count(c_id) == 3)
+````
+
+46.查询10月份过生日的学生
+```hql
+select s_name, s_sex, s_birth
+from student
+where substring(s_birth, 6, 2) = '10';
+
+--方法2
+select s_name, s_sex, s_birth
+from student
+where month(s_birth) = '10';
+```
+
+47.查询本月过生日的学生
+```hql
+select s_name, s_sex, s_birth
+from student
+where month(s_birth) = month(CURRENT_DATE);
+```
+
+48.查询各学生的年龄（周岁）
+```hql
+-- 查询各学生的年龄（周岁）
+-- 按照出生日期来算，当前月日 < 出生年月的月日则，年龄减一
+select s_name,
+       s_birth,
+       (year(CURRENT_DATE) - year(s_birth) -
+        (case
+             when month(CURRENT_DATE) < month(s_birth) then 1
+             when month(CURRENT_DATE) = month(s_birth) and day(CURRENT_DATE) < day(s_birth) then 1
+             else 0 end)
+           ) as age
+from student;
+```
