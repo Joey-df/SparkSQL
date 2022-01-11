@@ -93,10 +93,10 @@ set hive.exec.mode.local.auto.input.files.max=10;
 
 ### 三、Hive的存储、压缩
 1、合理利用文件存储格式   
-创建表时，尽量使用 orc、parquet 这些列式存储格式，因为列式存储的表，每一列的数据在物理上是存储在一起的，Hive查询时会只遍历需要列数据，大大减少处理的数据量。
+创建表时，尽量使用 orc、parquet 这些列式存储格式，因为列式存储的表，每一列的数据在物理上是存储在一起的，Hive查询时会只遍历需要列数据，大大减少处理的数据量。  
 2、压缩的原因  
 Hive 最终是转为 MapReduce 程序来执行的，而MapReduce 的性能瓶颈在于网络 IO 和 磁盘 IO，要解决性能瓶颈，最主要的是减少数据量，对数据进行压缩是个好的方式。
-压缩 虽然是减少了数据量，但是压缩过程要消耗CPU的，但是在Hadoop中， 往往性能瓶颈不在于CPU，CPU压力并不大，所以压缩充分利用了比较空闲的 CPU。
+压缩 虽然是减少了数据量，但是压缩过程要消耗CPU的，但是在Hadoop中， 往往性能瓶颈不在于CPU，CPU压力并不大，所以压缩充分利用了比较空闲的 CPU。  
 3、常用压缩方法对比  
 | 压缩格式 | 工具  | 算法  | 文件扩展名 | 是否可切分 |
 | --- | --- | --- | --- | --- |
@@ -124,18 +124,18 @@ Hive 最终是转为 MapReduce 程序来执行的，而MapReduce 的性能瓶颈
 
 6、压缩使用  
 Job 输出文件按照 block 以 GZip 的方式进行压缩：
-```
+```hql
 set mapreduce.output.fileoutputformat.compress=true // 默认值是 false
 set mapreduce.output.fileoutputformat.compress.type=BLOCK // 默认值是 Record
 set mapreduce.output.fileoutputformat.compress.codec=org.apache.hadoop.io.compress.GzipCodec // 默认值是 org.apache.hadoop.io.compress.DefaultCodec
 ```
 Map 输出结果也以 Gzip 进行压缩：  
-```
+```hql
 set mapred.map.output.compress=true
 set mapreduce.map.output.compress.codec=org.apache.hadoop.io.compress.GzipCodec // 默认值是 org.apache.hadoop.io.compress.DefaultCodec 
 ```
 对 Hive 输出结果和中间都进行压缩：  
-```
+```hql
 set hive.exec.compress.output=true // 默认值是 false，不压缩
 set hive.exec.compress.intermediate=true // 默认值是 false，为 true 时 MR 设置的压缩才启用
 ```
@@ -167,11 +167,12 @@ set hive.ignore.mapjoin.hint=false;
 
 #### 4、大表join大表
 ​4.1、空key过滤：有时join超时是因为某些key对应的数据太多，而相同key对应的数据都会发送到相同的reducer上，从而导致内存不够。
-此时我们应该仔细分析这些异常的key，很多情况下，这些key对应的数据是异常数据，我们需要在SQL语句中进行过滤。例如key对应的字段为空，操作如下：
-案例实操
+此时我们应该仔细分析这些异常的key，很多情况下，这些key对应的数据是异常数据，我们需要在SQL语句中进行过滤。例如key对应的字段为空，操作如下：  
+
+案例实操  
 （1）配置历史服务器
 配置mapred-site.xml
-```
+```hql
 <property>
     <name>mapreduce.jobhistory.address</name>
     <value>node21:10020</value>
@@ -217,11 +218,11 @@ Time taken: 31.725 seconds
 案例实操：
 不随机分布空null值：
 （1）设置5个reduce个数
-```
+```hql
 set mapreduce.job.reduces = 5;
 ```
 （2）JOIN两张表
-```
+```hql
 insert overwrite table jointable
 select n.* from nullidtable n left join ori b on n.id = b.id;
 ```
@@ -229,11 +230,11 @@ select n.* from nullidtable n left join ori b on n.id = b.id;
 
 随机分布空null值
 （1）设置5个reduce个数
-```
+```hql
 set mapreduce.job.reduces = 5;
 ```
 （2）JOIN两张表
-```
+```hql
 insert overwrite table jointable
 select n.* from nullidtable n full join ori o on
 case when n.id is null then concat('hive', rand()) else n.id end = o.id;
@@ -249,7 +250,7 @@ case when n.id is null then concat('hive', rand()) else n.id end = o.id;
 **实际论证：**
 order_snap为订单的快照表 总记录条数763191489，即将近8亿条记录,总大小:108.877GB,存储的是公司所有的订单信息，
 表的字段大概有20个,其中订单号是没有重复的,所以在统计总共有多少订单号的时候去重、不去重结果都一样，我们来看看:
-统计所有的订单有多少条，一个count函数就可以搞定的sql性能如何。
+统计所有的订单有多少条，一个count函数就可以搞定的sql性能如何。  
 **DISTINCT：**
 ```hql
 select count(distinct order_no) from order_snap;
