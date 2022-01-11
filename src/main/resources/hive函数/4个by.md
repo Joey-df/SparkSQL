@@ -8,8 +8,7 @@ SELECT * FROM student s LEFT JOIN score sco ON s.s_id = sco.s_id ORDER BY sco.s_
 
 # sort by 局部排序
 ```
-每个MapReduce内部进行排序，对全局结果集来说不是排序。
-
+单机排序，单个 reduce 结果有序；对全局结果集来说不是有序的。
 设置reduce个数
 set mapreduce.job.reduces=3;
 
