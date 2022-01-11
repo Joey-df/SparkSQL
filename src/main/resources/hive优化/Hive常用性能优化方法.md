@@ -376,7 +376,7 @@ set hive.groupby.skewindata = true;
 ```
 
 8、合并小文件
-小文件的产生有三个地方，map输入，map输出，reduce输出，小文件过多也会影响hive的分析效率：
+小文件的产生有三个地方，map输入，map输出，reduce输出，小文件过多也会影响hive的分析效率：  
 （1）.设置map输入的小文件合并:
 ```
 set mapred.max.split.size=256000000;  
