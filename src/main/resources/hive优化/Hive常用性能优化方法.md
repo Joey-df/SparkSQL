@@ -141,15 +141,16 @@ set hive.exec.compress.intermediate=true // 默认值是 false，为 true 时 MR
 ### 四、表join的优化
 #### 1、Hive 在多个表的join操作时尽可能多的使用相同的连接键，这样在转换MR任务时会转换成尽量少的MR的任务
 （当三个或多个以上的表进行join操作时，如果每个on使用相同的字段连接时只会产生一个mapreduce）。
-
-#### 2、手动Map join:在map端完成join操作
+#### 2、小表进行mapjoin
+如果在join的表中，有一张表数据量较小，可以存于内存中，这样该表在和其他表join时可以直接在map端进行，省掉reduce过程，效率高。
+2.1、手动Map join:在map端完成join操作
 ```sql
 --SQL方式，在SQL语句中添加MapJoin标记（mapjoin hint）
 SELECT  /*+ MAPJOIN(smallTable) */  smallTable.key,  bigTable.value 
 FROM  smallTable  JOIN  bigTable  ON  smallTable.key  =  bigTable.key;
 ```
 
-#### 3、开启自动的Map Join
+2.2、开启自动的Map Join
 ```sql
 --通过修改以下配置启用自动的mapjoin：
 set hive.auto.convert.join = true;
@@ -304,7 +305,7 @@ select id,name from tb1 where id in (select id from tb2);
 
 #### 4、优化 in/exists 语句
 虽然经过测验，hive1.2.1 也支持 in/exists 操作，但还是推荐使用 hive 的一个高效替代方案：left semi join
-
+因为left semi join在执行时，对于左表中指定的一条记录，一旦在右表中找到立即停止扫描，效率更高.
 比如说：
 ```hql
 select a.id, a.name from a where a.id in (select b.id from b);
@@ -411,6 +412,7 @@ CREATE TABLE page_view(viewTime INT, userid BIGINT,
  MAP KEYS TERMINATED BY '3'
  STORED AS SEQUENCEFILE;
 ```
+对于经常join的表，针对join字段进行分桶，这样在join时不必全表扫描。
 
 ### 八、启用压缩
 压缩job的中间结果数据和输出数据，可以用少量CPU时间节省很多空间，压缩方式一般选择Snappy。
