@@ -360,7 +360,7 @@ set mapred.reduce.tasks = 20
 set hive.groupby.skewindata=true;
 ```
 
-7、Group By
+7、Group By  
 默认情况下，Map阶段同一Key数据分发给一个reduce，当一个key数据过大时就倾斜了。并不是所有的聚合操作都需要在Reduce端完成，很多聚合操作都可以先在Map端进行部分聚合，最后在Reduce端得出最终结果。
 ```hql
 开启Map端聚合参数设置
