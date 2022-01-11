@@ -166,12 +166,12 @@ set hive.ignore.mapjoin.hint=false;
 --（默认值：true；是否忽略mapjoin hint 即mapjoin标记）
 ```
 
-#### 4、大表join大表
-​4.1、空key过滤：有时join超时是因为某些key对应的数据太多，而相同key对应的数据都会发送到相同的reducer上，从而导致内存不够。
+#### 3、大表join大表
+​3.1、空key过滤：有时join超时是因为某些key对应的数据太多，而相同key对应的数据都会发送到相同的reducer上，从而导致内存不够。
 此时我们应该仔细分析这些异常的key，很多情况下，这些key对应的数据是异常数据，我们需要在SQL语句中进行过滤。例如key对应的字段为空，操作如下：  
 
 案例实操  
-（1）配置历史服务器
+（1）配置历史服务器  
 配置mapred-site.xml
 ```hql
 <property>
@@ -183,58 +183,59 @@ set hive.ignore.mapjoin.hint=false;
     <value>node21:19888</value>
 </property>
 ```
-启动历史服务器
+启动历史服务器  
 ```
 sbin/mr-jobhistory-daemon.sh start historyserver
 ```
-查看jobhistory
+查看jobhistory  
 ```
 http://node21:19888/jobhistory
 ```
-（2）创建原始数据表、空id表、合并后数据表
+（2）创建原始数据表、空id表、合并后数据表  
 ```hql
 create table ori(id bigint, time bigint, uid string, keyword string, url_rank int, click_num int, click_url string) row format delimited fields terminated by '\t';
 create table nullidtable(id bigint, time bigint, uid string, keyword string, url_rank int, click_num int, click_url string) row format delimited fields terminated by '\t';
 create table jointable(id bigint, time bigint, uid string, keyword string, url_rank int, click_num int, click_url string) row format delimited fields terminated by '\t';
 ```
-（3）分别加载原始数据和空id数据到对应表中
+（3）分别加载原始数据和空id数据到对应表中  
 ```hql
 hive (default)> load data local inpath '/opt/module/datas/ori' into table ori;
 hive (default)> load data local inpath '/opt/module/datas/nullid' into table nullidtable;
 ```
-（4）测试不过滤空id
+（4）测试不过滤空id  
 ```hql
 hive (default)> insert overwrite table jointable
 select n.* from nullidtable n left join ori o on n.id = o.id;
 Time taken: 42.038 seconds
 ```
-（5）测试过滤空id
+（5）测试过滤空id  
 ```hql
 hive (default)> insert overwrite table jointable
 select n.* from (select * from nullidtable where id is not null ) n left join ori o on n.id = o.id;
 Time taken: 31.725 seconds
 ```
-​4.2、空key转换：有时虽然某个key为空对应的数据很多，但是相应的数据不是异常数据，必须要包含在join的结果中，此时我们可以表a中key为空的字段赋一个随机的值，使得数据随机均匀地分不到不同的reducer上。
-例如：
-案例实操：
-不随机分布空null值：
-（1）设置5个reduce个数
+
+​3.2、空key转换：有时虽然某个key为空对应的数据很多，但是相应的数据不是异常数据，必须要包含在join的结果中，此时我们可以表a中key为空的字段赋一个随机的值，使得数据随机均匀地分不到不同的reducer上。  
+例如：  
+案例实操：  
+**不随机分布空null值：**  
+（1）设置5个reduce个数  
 ```hql
 set mapreduce.job.reduces = 5;
 ```
-（2）JOIN两张表
+（2）JOIN两张表  
 ```hql
 insert overwrite table jointable
 select n.* from nullidtable n left join ori b on n.id = b.id;
 ```
-结果：可以看出来，出现了数据倾斜，某些reducer的资源消耗远大于其他reducer。
+结果：可以看出来，出现了数据倾斜，某些reducer的资源消耗远大于其他reducer。  
 
-随机分布空null值
-（1）设置5个reduce个数
+**随机分布空null值**  
+（1）设置5个reduce个数  
 ```hql
 set mapreduce.job.reduces = 5;
 ```
-（2）JOIN两张表
+（2）JOIN两张表  
 ```hql
 insert overwrite table jointable
 select n.* from nullidtable n full join ori o on
@@ -244,14 +245,14 @@ case when n.id is null then concat('hive', rand()) else n.id end = o.id;
 
 ### 五、SQL优化
 #### 1、使用group by + count 代替 Count(Distinct)
-作用：去重统计
-数据量小的时候无所谓；
+作用：去重统计  
+数据量小的时候无所谓；  
 但是当一个表的数据量非常大的时候，会发现一个简单的count(distinct order_no)这种语句跑的特别慢，和直接运行count(order_no)的时间差了很多，于是研究了一下。
 先说结论：能使用group by代替distinct就不要使用distinct，例子：  
 **实际论证：**
-order_snap为订单的快照表 总记录条数763191489，即将近8亿条记录,总大小:108.877GB,存储的是公司所有的订单信息，
-表的字段大概有20个,其中订单号是没有重复的,所以在统计总共有多少订单号的时候去重、不去重结果都一样，我们来看看:
-统计所有的订单有多少条，一个count函数就可以搞定的sql性能如何。  
+order_snap为订单的快照表 总记录条数763191489，即将近8亿条记录,总大小:108.877GB,存储的是公司所有的订单信息，  
+表的字段大概有20个,其中订单号是没有重复的,所以在统计总共有多少订单号的时候去重、不去重结果都一样，我们来看看:  
+统计所有的订单有多少条，一个count函数就可以搞定的sql性能如何。   
 **DISTINCT：**
 ```hql
 select count(distinct order_no) from order_snap;
@@ -283,13 +284,13 @@ Stage-Stage-1: Map: 396 Reduce: 457 Cumulative CPU: 10056.7 sec HDFS Read: 11907
 使用distinct会将所有的order_no都shuffle到一个reducer里面，这就是我们所说的数据倾斜，都倾斜到一个reducer这样性能能不低么？
 再看第二个，直接按订单号分组，起了457个reducer（每个reduce对收到的一组数据，进行**去重**），将数据分布到多台机器上执行，时间当然快了。
 >结论:
->distinct只会启动一个reducer，会发生数据倾斜，效率低下；
->group by + count会采用分治的思想，启动多个reducer，每个reducer对一组数据进行去重+count，最后全局count得到结果，效率自然会提高；
->能使用group by代替distinct就不要使用distinct。
+>distinct只会启动一个reducer，会发生数据倾斜，效率低下；  
+>group by + count会采用分治的思想，启动多个reducer，每个reducer对一组数据进行去重+count，最后全局count得到结果，效率自然会提高；  
+>能使用group by代替distinct就不要使用distinct。  
 
 #### 2、where条件优化
-先where过滤后join on，以减少读取的数据量。
-优化前（关系数据库不用考虑会自动优化）
+先where过滤后join on，以减少读取的数据量。  
+优化前（关系数据库不用考虑会自动优化）  
 ```
 select m.cid,u.id from order m join customer u on ( m.cid =u.id ) where m.dt='20180808';
 ```
@@ -308,9 +309,9 @@ select id,name from tb1 where id in (select id from tb2);
 ```
 
 #### 4、优化 in/exists 语句
-虽然经过测验，hive1.2.1 也支持 in/exists 操作，但还是推荐使用 hive 的一个高效替代方案：left semi join
-因为left semi join在执行时，对于左表中指定的一条记录，一旦在右表中找到立即停止扫描，效率更高.
-比如说：
+虽然经过测验，hive1.2.1 也支持 in/exists 操作，但还是推荐使用 hive 的一个高效替代方案：left semi join  
+因为left semi join在执行时，对于左表中指定的一条记录，一旦在右表中找到立即停止扫描，效率更高.  
+比如说：  
 ```hql
 select a.id, a.name from a where a.id in (select b.id from b);
 select a.id, a.name from a where exists (select id from b where a.id = b.id);
@@ -329,21 +330,21 @@ select a.id, a.name from a left semi join b on a.id = b.id;
 hive> set hive.fetch.task.conversion=more;
 ```
 2、开启任务并行执行
-Hive会将一个查询转化成一个或者多个阶段。这样的阶段可以是MapReduce阶段、抽样阶段、合并阶段、limit阶段。或者Hive执行过程中可能需要的其他阶段。
-默认情况下，Hive一次只会执行一个阶段。不过，某个特定的job可能包含众多的阶段，而这些阶段可能并非完全互相依赖的，也就是说有些阶段是可以并行执行的，这样可能使得整个job的执行时间缩短。
-不过，如果有更多的阶段可以并行执行，那么job可能就越快完成。
-通过设置参数hive.exec.parallel值为true，就可以开启并发执行。不过，在共享集群中，需要注意下，如果job中并行阶段增多，那么集群利用率就会增加。
+Hive会将一个查询转化成一个或者多个阶段。这样的阶段可以是MapReduce阶段、抽样阶段、合并阶段、limit阶段。或者Hive执行过程中可能需要的其他阶段。  
+默认情况下，Hive一次只会执行一个阶段。不过，某个特定的job可能包含众多的阶段，而这些阶段可能并非完全互相依赖的，也就是说有些阶段是可以并行执行的，这样可能使得整个job的执行时间缩短。  
+不过，如果有更多的阶段可以并行执行，那么job可能就越快完成。  
+通过设置参数hive.exec.parallel值为true，就可以开启并发执行。不过，在共享集群中，需要注意下，如果job中并行阶段增多，那么集群利用率就会增加。  
 ```
 set hive.exec.parallel=true;
 ```
 解释：当一个sql中有多个job时候，且这多个job之间没有依赖，则可以让顺序执行变为并行执行（一般为用到union all的时候）
  
-3、同一个sql允许并行任务的最大线程数 
+3、同一个sql允许并行任务的最大线程数   
 set hive.exec.parallel.thread.number=8;
  
 4、设置jvm重用
-JVM重用对hive的性能具有非常大的 影响，特别是对于很难避免小文件的场景或者task特别多的场景，这类场景大多数执行时间都很短。
-jvm的启动过程可能会造成相当大的开销，尤其是执行的job包含有成千上万个task任务的情况。
+JVM重用对hive的性能具有非常大的 影响，特别是对于很难避免小文件的场景或者task特别多的场景，这类场景大多数执行时间都很短。  
+jvm的启动过程可能会造成相当大的开销，尤其是执行的job包含有成千上万个task任务的情况。  
 ```hql
 set mapred.job.reuse.jvm.num.tasks=10; 
 ```
@@ -375,9 +376,9 @@ set hive.groupby.skewindata = true;
 第二个MR Job再根据预处理的数据结果按照Group By Key分布到Reduce中（这个过程可以保证相同的Group By Key被分布到同一个Reduce中），最后完成最终的聚合操作。
 ```
 
-8、合并小文件
-小文件的产生有三个地方，map输入，map输出，reduce输出，小文件过多也会影响hive的分析效率：  
-（1）.设置map输入的小文件合并:
+8、合并小文件  
+小文件的产生有三个地方，map输入，map输出，reduce输出，小文件过多也会影响hive的分析效率：    
+（1）.设置map输入的小文件合并:  
 ```
 set mapred.max.split.size=256000000;  
 //一个节点上split的至少的大小(这个值决定了多个DataNode上的文件是否需要合并)
@@ -400,7 +401,7 @@ set hive.merge.smallfiles.avgsize=16000000
 ```
 
 ### 七、合理利用分区分桶
-1、分区是将表的数据在物理上分成不同的文件夹，以便于在查询时可以精准指定所要读取的分区目录，从来降低读取的数据量。  
+1、分区是将表的数据在物理上分成不同的文件夹，以便于在查询时可以精准指定所要读取的分区目录，从来降低读取的数据量。    
 2、分桶是将表数据按指定列的hash散列后分在了不同的文件中，将来查询时，hive可以根据分桶结构，快速定位到一行数据所在的分桶文件，从来提高读取效率。  
 如下例就是以 userid 这一列为 bucket 的依据，共设置 32 个 buckets:  
 ```hql
@@ -419,11 +420,11 @@ CREATE TABLE page_view(viewTime INT, userid BIGINT,
 对于经常join的表，针对join字段进行分桶，这样在join时不必全表扫描。
 
 ### 八、启用压缩
-压缩job的中间结果数据和输出数据，可以用少量CPU时间节省很多空间，压缩方式一般选择Snappy。
-要启用中间压缩，需要设定hive.exec.compress.intermediate为true，
-同时指定压缩方式hive.intermediate.compression.codec为org.apache.hadoop.io.compress.SnappyCodec。
-另外，参数hive.intermediate.compression.type可以选择对块（BLOCK）还是记录（RECORD）压缩，BLOCK的压缩率比较高。
-输出压缩的配置基本相同，打开hive.exec.compress.output即可。
+压缩job的中间结果数据和输出数据，可以用少量CPU时间节省很多空间，压缩方式一般选择Snappy。  
+要启用中间压缩，需要设定hive.exec.compress.intermediate为true，  
+同时指定压缩方式hive.intermediate.compression.codec为org.apache.hadoop.io.compress.SnappyCodec。  
+另外，参数hive.intermediate.compression.type可以选择对块（BLOCK）还是记录（RECORD）压缩，BLOCK的压缩率比较高。  
+输出压缩的配置基本相同，打开hive.exec.compress.output即可。  
 
 ### 九、推测执行
 在分布式集群环境下，由于负载不均衡或者资源分布不均等原因，会造成同一个作业的多个job之间运行速度不一致，有些job的运行速度可能明显慢于其他任务，则这些job会拖慢整个作业的执行进度。
