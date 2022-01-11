@@ -400,9 +400,9 @@ set hive.merge.smallfiles.avgsize=16000000
 ```
 
 ### 七、合理利用分区分桶
-1、分区是将表的数据在物理上分成不同的文件夹，以便于在查询时可以精准指定所要读取的分区目录，从来降低读取的数据量。
-2、分桶是将表数据按指定列的hash散列后分在了不同的文件中，将来查询时，hive可以根据分桶结构，快速定位到一行数据所在的分桶文件，从来提高读取效率。
-如下例就是以 userid 这一列为 bucket 的依据，共设置 32 个 buckets:
+1、分区是将表的数据在物理上分成不同的文件夹，以便于在查询时可以精准指定所要读取的分区目录，从来降低读取的数据量。  
+2、分桶是将表数据按指定列的hash散列后分在了不同的文件中，将来查询时，hive可以根据分桶结构，快速定位到一行数据所在的分桶文件，从来提高读取效率。  
+如下例就是以 userid 这一列为 bucket 的依据，共设置 32 个 buckets:  
 ```hql
 CREATE TABLE page_view(viewTime INT, userid BIGINT,
  page_url STRING, referrer_url STRING,
