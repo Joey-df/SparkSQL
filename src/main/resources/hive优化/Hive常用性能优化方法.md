@@ -245,7 +245,7 @@ case when n.id is null then concat('hive', rand()) else n.id end = o.id;
 作用：去重统计
 数据量小的时候无所谓；
 但是当一个表的数据量非常大的时候，会发现一个简单的count(distinct order_no)这种语句跑的特别慢，和直接运行count(order_no)的时间差了很多，于是研究了一下。
-先说结论：能使用group by代替distinct就不要使用distinct，例子：
+先说结论：能使用group by代替distinct就不要使用distinct，例子：  
 **实际论证：**
 order_snap为订单的快照表 总记录条数763191489，即将近8亿条记录,总大小:108.877GB,存储的是公司所有的订单信息，
 表的字段大概有20个,其中订单号是没有重复的,所以在统计总共有多少订单号的时候去重、不去重结果都一样，我们来看看:
