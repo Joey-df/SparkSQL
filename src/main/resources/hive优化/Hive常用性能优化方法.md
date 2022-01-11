@@ -40,7 +40,7 @@ where a.id > 15 and b.num > 16;
 
 ## Hive优化
 ### 一、hive.fetch.task.conversion（fetch抓取策略）
-(1)、理论分析
+(1)、理论分析：
 Fetch抓取是指，Hive中对某些情况的查询可以不必使用MapReduce计算（能不启用mapreduce就不启动mapreduce）。
 例如：SELECT * FROM emp;在这种情况下，Hive可以简单地读取emp对应的存储目录下的文件，然后输出查询结果到控制台。
 在hive-default.xml.template文件中hive.fetch.task.conversion默认是more，老版本hive默认是minimal，该属性修改为more以后，在全局查找、字段查找、limit查找等都不走mapreduce。
@@ -92,12 +92,12 @@ set hive.exec.mode.local.auto.input.files.max=10;
 ```
 
 ### 三、Hive的存储、压缩
-1、合理利用文件存储格式 
+**1、合理利用文件存储格式** 
 创建表时，尽量使用 orc、parquet 这些列式存储格式，因为列式存储的表，每一列的数据在物理上是存储在一起的，Hive查询时会只遍历需要列数据，大大减少处理的数据量。
-2、压缩的原因
+**2、压缩的原因**
 Hive 最终是转为 MapReduce 程序来执行的，而MapReduce 的性能瓶颈在于网络 IO 和 磁盘 IO，要解决性能瓶颈，最主要的是减少数据量，对数据进行压缩是个好的方式。
 压缩 虽然是减少了数据量，但是压缩过程要消耗CPU的，但是在Hadoop中， 往往性能瓶颈不在于CPU，CPU压力并不大，所以压缩充分利用了比较空闲的 CPU。
-3、常用压缩方法对比
+**3、常用压缩方法对比**
 | 压缩格式 | 工具  | 算法  | 文件扩展名 | 是否可切分 |
 | --- | --- | --- | --- | --- |
 | DEFAULT | 无   | DEFAULT | .deflate | 否   |
@@ -106,7 +106,8 @@ Hive 最终是转为 MapReduce 程序来执行的，而MapReduce 的性能瓶颈
 | LZO | lzop | LZO | .lzo | 否   |
 | LZ4 | 无   | LZ4 | .lz4 | 否   |
 | Snappy | 无   | Snappy | .snappy | 否   |
-4、各个压缩方式所对应的 Class 类：
+
+**4、各个压缩方式所对应的 Class 类：**
 | 压缩格式 | 对应的编码/解码器 |
 | --- | --- |
 | DEFLATE | org.apache.hadoop.io.compress.DefaultCodec |
@@ -115,12 +116,13 @@ Hive 最终是转为 MapReduce 程序来执行的，而MapReduce 的性能瓶颈
 | LZO | com.hadoop.compression.lzo.LzopCodec |
 | LZ4 | org.apache.hadoop.io.compress.Lz4Codec |
 | Snappy | org.apache.hadoop.io.compress.SnappyCodec |
-5、压缩方式的选择
+
+**5、压缩方式的选择**
 压缩比率
 压缩解压缩速度
 是否支持 Split
 
-6、压缩使用
+**6、压缩使用**
 Job 输出文件按照 block 以 GZip 的方式进行压缩：
 ```
 set mapreduce.output.fileoutputformat.compress=true // 默认值是 false
