@@ -145,6 +145,7 @@ set hive.exec.compress.intermediate=true // 默认值是 false，为 true 时 MR
 （当三个或多个以上的表进行join操作时，如果每个on使用相同的字段连接时只会产生一个mapreduce）。
 #### 2、小表进行mapjoin
 如果在join的表中，有一张表数据量较小，可以存于内存中，这样该表在和其他表join时可以直接在map端进行，省掉reduce过程，效率高。
+
 2.1、手动Map join:在map端完成join操作
 ```sql
 --SQL方式，在SQL语句中添加MapJoin标记（mapjoin hint）
