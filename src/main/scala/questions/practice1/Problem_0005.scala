@@ -1,4 +1,4 @@
-package questions.practice
+package questions.practice1
 
 /**
  * 第五题（尚硅谷第5题）

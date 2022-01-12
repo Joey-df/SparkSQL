@@ -1,15 +1,18 @@
-package questions.practice
+package questions.practice1
 
 /**
  * 第八题（尚硅谷第9题）
  * 需求：
  * 充值日志表credit_log，字段如下：
- * `dist_id` int  '区组id',
- * `account` string  '账号',
- * `money` int   '充值金额',
- * `create_time` string  '订单时间'
+ * CREATE TABLE `credit log`
+ * (
+ * `dist_id` int（11）DEFAULT NULL COMMENT '区组id',
+ * `account` varchar（100）DEFAULT NULL COMMENT '账号',
+ * `money` int(11) DEFAULT NULL COMMENT '充值金额',
+ * `create_time` datetime DEFAULT NULL COMMENT '订单时间'
+ * ) ENGINE=InnoDB DEFAUILT CHARSET-utf8
  *
- * 请写出SQL语句，查询充值日志表2020年08月08号每个区组下充值额最大的账号，要求结果：
+ * 请写出SQL语句，查询充值日志表2020年08月08号每个区组下、充值额最大的账号，要求结果：
  * 区组id，账号，金额，充值时间
  */
 object Problem_0008 {

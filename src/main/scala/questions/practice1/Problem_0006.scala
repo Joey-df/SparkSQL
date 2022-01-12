@@ -1,11 +1,14 @@
-package questions.practice
+package questions.practice1
 
 /**
  * 第六题（尚硅谷第6题）
  * 需求：
  * 请用sql写出所有用户中在2020年10月份第一次购买商品的金额，
  * 表order字段如下:
- * 购买用户：user_id，金额：money，购买时间：pay_time(格式：2017-10-01)，订单id：order_id
+ * 购买用户：user_id，
+ * 金额：money，
+ * 购买时间：pay_time(格式：2017-10-01)，
+ * 订单id：order_id
  */
 object Problem_0006 {
 

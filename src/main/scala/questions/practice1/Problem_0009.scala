@@ -1,4 +1,4 @@
-package questions.practice
+package questions.practice1
 
 /**
  * 第九题（尚硅谷第8题）

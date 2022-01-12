@@ -1,4 +1,4 @@
-package questions.practice
+package questions.practice1
 
 /**
  * 第十题
@@ -99,54 +99,10 @@ package questions.practice
  * 50.查询本周过生日的学生
  *
  */
-object Problem_0010 {
+object Problem_0010_问题描述 {
 
   def main(args: Array[String]): Unit = {
 
-    //SELECT sum(total_user_cnt)     total_user_cnt,
-    //       sum(total_user_avg_age) total_user_avg_age,
-    //       sum(two_days_cnt)       two_days_cnt,
-    //       sum(avg_age)            avg_age
-    //FROM (SELECT 0                                             total_user_cnt,
-    //             0                                             total_user_avg_age,
-    //             count(*)                                   AS two_days_cnt,
-    //             cast(sum(age) / count(*) AS decimal(5, 2)) AS avg_age
-    //      FROM (
-    //               SELECT user_id,
-    //                      max(age) age
-    //               FROM (
-    //                        SELECT user_id,
-    //                               max(age) age
-    //                        FROM (
-    //                                 SELECT user_id,
-    //                                        age,
-    //                                        date_sub(date_time, rank) flag
-    //                                 FROM (SELECT date_time,
-    //                                              user_id,
-    //                                              max(age)                                                    age,
-    //                                              row_number() over (PARTITION BY user_id ORDER BY date_time) rank
-    //                                       FROM test_db.log_info
-    //                                       GROUP BY date_time, user_id) t1
-    //                             ) t2
-    //                        GROUP BY user_id, flag
-    //                        HAVING count(*) >= 2
-    //                    ) t3
-    //               GROUP BY user_id
-    //           ) t4
-    //
-    //      UNION ALL
-    //
-    //      SELECT count(*)                                   total_user_cnt,
-    //             cast(sum(age) / count(*) AS decimal(5, 2)) total_user_avg_age,
-    //             0                                          two_days_cnt,
-    //             0                                          avg_age
-    //      FROM (
-    //               SELECT user_id,
-    //                      max(age) age
-    //               FROM test_db.log_info
-    //               GROUP BY user_id
-    //           ) t5
-    //     ) t6;
   }
 
 }

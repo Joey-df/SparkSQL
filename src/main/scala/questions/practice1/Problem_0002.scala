@@ -1,9 +1,9 @@
-package questions.practice
+package questions.practice1
 
 /**
  * 第二题（尚硅谷第2题）
  * 需求：
- * 有50W个京东店铺，每个顾客访客访问任何一个店铺的任何一个商品时都会产生一条访问日志，
+ * 有50W个店铺，每个顾客访客访问任何一个店铺的任何一个商品时都会产生一条访问日志，
  * 访问日志存储的表名为 user_visit，
  * 访客的用户id为user_id，被访问的店铺名称为shop_name，
  *
@@ -26,7 +26,7 @@ object Problem_0002 {
     //            GROUP BY user_id, shop_name
     //        ) t
     //   GROUP BY shop_name as t;
-    //
+    // -- 还有一种是使用count(distinct)，效率没有这种group by + count高
 
 
     //   （2）
