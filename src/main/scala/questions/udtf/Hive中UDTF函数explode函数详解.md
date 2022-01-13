@@ -81,7 +81,7 @@ columnAlias：表示虚拟表的虚拟字段名称，如果分裂之后有一个
 from basetable (lateral view)* //表示多个lateral view
 ```
 >在from子句中使用，一般和格式一搭配使用，这个格式只是说明了lateral view的使用位置。  
-from子句后面也可以跟多个lateral view语句，使用 **空格** 隔开就可以了。  
+from子句后面也可以跟多个lateral view语句，使用 **空格** 隔开就可以了，**结果是笛卡尔积**。  
 ```hql
 eg:
 SELECT myCol1, myCol2 FROM baseTable
@@ -89,6 +89,8 @@ LATERAL VIEW explode(col1) tf1 AS myCol1
 LATERAL VIEW explode(col2) tf2 AS myCol2;
 #col1为表baseTable字段中的map或者array类型
 #col2为表baseTable字段中的map或者array类型
+
+结果是myCol1和myCol2组成的笛卡尔积。
 ```
 #### 3、udtf + lateral view 格式三
 ```hql
