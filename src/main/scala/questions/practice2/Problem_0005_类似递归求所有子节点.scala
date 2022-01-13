@@ -64,7 +64,17 @@ object Problem_0005_类似递归求所有子节点 {
         |)
         |""".stripMargin).show()
 
+    //此方法有问题
+    ss.sql(
+      """
+        |select ID
+        |from table_info
+        |where PARENT_ID = '901'
+        |union all
+        |select second.ID
+        |from table_info first
+        |         join (select * from table_info) second on first.ID = second.PARENT_ID
+        |""".stripMargin).show()
   }
-
 
 }
