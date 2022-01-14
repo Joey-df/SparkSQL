@@ -5,7 +5,7 @@ https://blog.csdn.net/u013411339/article/details/120232456
 
 用户留存是体现平台健康程度的重要数据指标之一，请用hive sql完成如下需求：   
 已知：   
-用户信息表结构：     
+#### 用户信息表结构：     
 ```hql
 CREATE TABLE if NOT EXISTS dim_tb_user
 (
@@ -13,7 +13,7 @@ CREATE TABLE if NOT EXISTS dim_tb_user
     create_time STRING COMMENT "注册时间,如：2019-01-01 08:00:00"
 ) COMMENT "用户信息表";
 ```
-埋点访问日志表结构:
+#### 埋点访问日志表结构:
 ```hql
 CREATE TABLE if NOT EXISTS fact_access_log
 (
