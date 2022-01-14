@@ -1,0 +1,19 @@
+详解HIVE窗口函数及10道实战练习
+https://www.freesion.com/article/78171240211/
+
+Hive-窗口函数/开窗函数
+https://blog.csdn.net/weixin_43586713/article/details/120803599
+
+hive之窗口函数
+https://blog.csdn.net/weixin_38169206/article/details/996537011
+
+窗口函数案例练习（二）
+https://www.jianshu.com/p/80520123baa0
+
+原创 | 详解HIVE窗口函数及10道实战练习
+https://www.freesion.com/article/78171240211/
+https://blog.csdn.net/a934079371/article/details/108301730
+
+
+Hive-SQL工作中常用函数总结及案例实战(重点)
+https://blog.csdn.net/godlovedaniel/article/details/104977785

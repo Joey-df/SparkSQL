@@ -7,8 +7,8 @@ https://cwiki.apache.org/confluence/display/Hive/LanguageManual+UDF
 
 Hive中的函数分为3类,UDF函数、UDAF函数、UDTF函数  
 1. UDF：一进一出  
-2. UDAF：聚集函数，多进一出，类似于：count/max/min  
-3. UDTF：一进多出,如explore()、posexplode()，UDTF函数的时候只允许一个字段  
+2. UDAF：聚集函数，多进一出，类似于：count/max/min **（行转列 多行变一行）**
+3. UDTF：一进多出,如explore()、posexplode()，UDTF函数的时候只允许一个字段 **（列转行 一行变多行）**
 
 当我们百度搜索explode()时，经常会出现lateral view + explode相关的文章，很少单独写explode()。  
 分别了解ecplode() 与lateral view的各自作用很重要，不然过程都不知道实现的，换个UDTF函数就不会使用了。  

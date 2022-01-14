@@ -1,38 +1,53 @@
-# 开窗函数
-与聚合函数类似，开窗函数也是对行集组进行聚合计算。  
-但是它不像普通聚合函数那样，每组通常只返回一个值，开窗函数可以为每组返回多个值，因为开窗函数所执行聚合计算的行集组是窗口。  
+# 开窗函数 over()
 
 官方文档：
 ```html
 https://cwiki.apache.org/confluence/display/Hive/LanguageManual+WindowingAndAnalytics
 ```
 
+over() 才是窗口函数，而sum、row_number、count等只是与over()搭配的分析函数，当然除了这三个函数还有其他的函数。  
+>over()窗口函数的语法结构
+分析函数 over(partition by 列名 order by 列名 rows between 开始位置 and 结束位置)
+
+>我们在使用over()窗口函数时，over()函数中的这三个函数可组合使用、也可以不使用。
+over()函数中如果不使用这三个函数，窗口大小是针对查询产生的所有数据，如果指定了分区，窗口大小是针对每个分区的数据。
+
+与聚合函数类似，开窗函数也是对行集组进行聚合计算。  
+但是它不像普通聚合函数那样，每组通常只返回一个值，开窗函数可以为每组返回多个值，因为开窗函数所执行聚合计算的行集组是窗口。  
+
 常见的格式如下：  
 ```sql
 FUNCTION_NAME([argument_list])
 OVER (
-  [PARTITION BY window_partition, ...]
-  [ORDER BY window_ordering, ... [ASC|DESC]])
-  [ { ROWS | RANGE } BETWEEN frame_start AND frame_end ] 
+  [PARTITION BY 分区(分组)列, ...]
+  [ORDER BY 排序字段, ... [ASC|DESC]])
+  [ { ROWS | RANGE } BETWEEN 开始位置 AND 结束位置 ] 
 );
 ```
-FUNCTION_NAME：函数名称。如row_number()、sum()、first_value()等。  
-argument_list：函数的参数列表。  
-PARTITION BY：根据window_partition（分区字段）进行分区，该子句也被称为查询分区子句。  
-    类似于group by，都是将数据按照边界值进行分组。而OVER之前的函数在每一个分组之内进行，如果超出了分组，则函数会重新计算。  
-ORDER BY：将各个分区内的数据，根据window_ordering（排序字段）进行排序。  
+FUNCTION_NAME：分析函数的名称。如row_number()、sum()、first_value()等。  
+argument_list：分析函数的参数列表。  
+PARTITION BY：partition by可理解为group by 分组。over(partition by 列名)搭配分析函数时，分析函数按照每一组每一组的数据进行计算的。
+ORDER BY：将每个partition by分组内的数据（即窗口），根据window_ordering（排序字段）进行排序。  
     ORDER BY子句会对输入的数据强制排序（窗口函数是SQL语句最后执行的函数，因此可以把SQL结果集想象成输入数据）。  
     ORDER BY子句对于诸如row_number()，lead()，lag()等函数是必须的。如果数据无序，这些函数的结果就没有意义。  
-ROWS(或者RANGE)分别表示选择前后几行、选择数据范围。  
+rows between 开始位置 and 结束位置：
+窗口范围说明：
+我们常使用的窗口范围是ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW（表示从起点到当前行），常用该窗口来计算累加。 
 
 在介绍具体的开窗函数和示例之前，再来了解一下window子句：  
 
 PRECEDING：往前  
 FOLLOWING：往后   
 CURRENT ROW：当前行  
-UNBOUNDED：起点  
-UNBOUNDED PRECEDING 表示从前面的起点  
-UNBOUNDED FOLLOWING：表示到后面的终点  
+UNBOUNDED：起点（一般结合PRECEDING，FOLLOWING使用）  
+UNBOUNDED PRECEDING 表示该窗口最前面的行（起点）  
+UNBOUNDED FOLLOWING：表示该窗口最后面的行（终点）  
+> 比如说：
+ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW（表示从起点到当前行）
+ROWS BETWEEN 2 PRECEDING AND 1 FOLLOWING（表示往前2行到往后1行）
+ROWS BETWEEN 2 PRECEDING AND 1 CURRENT ROW（表示往前2行到当前行）
+ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING（表示当前行到终点）
+
 后面会有具体应用的示例。  
 
 ## sum() over() 
@@ -157,12 +172,12 @@ row_number、rank和dense_rank的对比：
 
 相同点：都是分组排序  
 不同点：  
-row_number：即便出现相同的排序，排名也不会一致，只会进行累加；即排序次序连续，但不会出现同一排名。1,2,3,4,5...  
+row_number：即便出现相同的排序，排名也不会一致，只会进行累加；集 会根据顺序计算（顺序编号，经常使用，唯一标记一条记录）。1,2,3,4,5...  
 rank：当出现相同的排序时，中间会出现一个空缺，即分组内会出现同一个排名，但是排名次序是不连续的。1,1,3,4,4,6...  
 dense_rank：当出现相同排序时，中间不会出现空缺，即分组内可能会出现同样的次序，且排序名次是连续的。1,1,1,2,3,4,4,5...  
 
 
-# first_value()  over()
+# first_value()  over() 获取数据窗口的第一行某字段值
 含义：取分组内排序后，截止到当前行，第一个值。  
 示例：按部门分组，统计每个部门员工工资以及该部门最低的员工工资。  
 数据（后面几个开窗函数也会用到这些数据）：  
@@ -205,8 +220,9 @@ FROM data;
 +-------+-------+------+----+
 ```
 
-## last_value() over()
-取分组内排序后，截止到当前行，最后一个值。但是使用last_value需要特别注意，这涉及到上述所说的window子句。先看一个例子：  
+## last_value() over() 获取数据窗口的最后一行某字段值
+取分组内排序后，截止到当前行，最后一个值。  
+但是使用last_value需要特别注意，这涉及到上述所说的window子句。先看一个例子：    
 按部门分组，统计每个部门员工工资以及该部门最高的员工工资。  
 执行如下SQL：  
 ```hql
@@ -301,11 +317,11 @@ SELECT name,
 FROM data;
 ```
 
-## lead(value_expr[,offset[,default]]) over()
+## lead(列名, offset, [default_value]) over()
 用于统计窗口内往下第n行值。  
 第一个参数为列名，  
-第二个参数为往下第n行（可选，默认为1），  
-第三个参数为默认值（当往下第n行为NULL时候，取默认值，如不指定，则为NULL。）    
+第二个参数offset为往下第n行（可选，默认为1），  
+第三个参数为default_value（当往下第n行为NULL时的默认值，如不指定则为NULL。）    
 示例：根据部门分组，统计每个部门员工的工资以及大于等于该员工工资的下一个员工的工资。  
 ```hql
 SELECT name,
@@ -330,11 +346,11 @@ FROM data;
 +-------+-------+------+-----+
 ```
 
-## lag(value_expr[,offset[,default]]) over()
+## lag(列名, offset, [default_value]) over()
 与lead相反，用于统计窗口内往上第n行值。  
 第一个参数为列名，  
-第二个参数为往上第n行（可选，默认为1），  
-第三个参数为默认值（当往上第n行为NULL时候，取默认值，如不指定，则为NULL。  
+第二个参数offset为往上第n行（可选，默认为1），  
+第三个参数为default_value（当往上第n行为NULL时的默认值，如不指定则为NULL）。  
 示例：根据部门分组，统计每个部门员工的工资以及小于等于该员工工资的上一个员工的工资。  
 ```hql
 SELECT name,
@@ -359,12 +375,12 @@ FROM data;
 +-------+-------+------+----+
 ```
 
-## ntile(n) over()
+## ntile(n) over() 分桶函数，类似于hive中的分桶策略
 
-NTILE(n)，用于将分组数据按照顺序切分成n片，返回当前切片值。  
+NTILE(n)，把**有序分区**(必须有order by)中的行分发到指定数据的组中，各个组有编号，编号从1开始，对于每一行，ntile返回此行所属的组的编号。    
 将一个有序的数据集划分为多个桶(bucket)，并为每行分配一个适当的桶数。它可用于将数据划分为相等的小切片，为每一行分配该小切片的数字序号。  
 NTILE不支持ROWS BETWEEN，比如NTILE(2) OVER(PARTITION BY dept_no ORDER BY salary ROWS BETWEEN 3 PRECEDING - AND CURRENT ROW)。  
-如果切片不均匀，默认增加第一个切片的分布。  
+**如果切片不均匀，默认增加第一个切片的分布**。  
 
 例如：
 ```hql
