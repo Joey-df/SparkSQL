@@ -6,11 +6,12 @@ https://cwiki.apache.org/confluence/display/Hive/LanguageManual+WindowingAndAnal
 ```
 
 over() 才是窗口函数，而sum、row_number、count等只是与over()搭配的分析函数，当然除了这三个函数还有其他的函数。  
->over()窗口函数的语法结构
+>over()窗口函数的语法结构如下        
 分析函数 over(partition by 列名 order by 列名 rows between 开始位置 and 结束位置)
 
->我们在使用over()窗口函数时，over()函数中的这三个函数可组合使用、也可以不使用。
-over()函数中如果不使用这三个函数，窗口大小是针对查询产生的所有数据，如果指定了分区，窗口大小是针对每个分区的数据。
+>我们在使用over()窗口函数时，over()函数中的这三个函数可组合使用、也可以不使用。    
+over()函数中如果不使用这三个函数，窗口大小是针对查询产生的所有数据；     
+如果指定了分区，窗口大小是针对每个分区的数据。
 
 与聚合函数类似，开窗函数也是对行集组进行聚合计算。  
 但是它不像普通聚合函数那样，每组通常只返回一个值，开窗函数可以为每组返回多个值，因为开窗函数所执行聚合计算的行集组是窗口。  
@@ -23,17 +24,17 @@ OVER (
   [ORDER BY 排序字段, ... [ASC|DESC]])
   [ { ROWS | RANGE } BETWEEN 开始位置 AND 结束位置 ] 
 );
-```
+
 FUNCTION_NAME：分析函数的名称。如row_number()、sum()、first_value()等。  
 argument_list：分析函数的参数列表。  
 PARTITION BY：partition by可理解为group by 分组。over(partition by 列名)搭配分析函数时，分析函数按照每一组每一组的数据进行计算的。
 ORDER BY：将每个partition by分组内的数据（即窗口），根据window_ordering（排序字段）进行排序。  
     ORDER BY子句会对输入的数据强制排序（窗口函数是SQL语句最后执行的函数，因此可以把SQL结果集想象成输入数据）。  
     ORDER BY子句对于诸如row_number()，lead()，lag()等函数是必须的。如果数据无序，这些函数的结果就没有意义。  
-rows between 开始位置 and 结束位置：
-窗口范围说明：
+rows between 开始位置 and 结束位置：   
+窗口范围说明：   
 我们常使用的窗口范围是ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW（表示从起点到当前行），常用该窗口来计算累加。 
-
+```
 在介绍具体的开窗函数和示例之前，再来了解一下window子句：  
 
 PRECEDING：往前  
