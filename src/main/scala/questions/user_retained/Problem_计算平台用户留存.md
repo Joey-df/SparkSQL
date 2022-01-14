@@ -52,6 +52,38 @@ fact_access_log ：每天新增访问日志记录数据量数亿行
 | 新用户数 | 次1日留存用户数  | 次2日留存用户数  |  次3日留存用户数 | 次4日留存用户数  | 次5日留存用户数  |  次6日留存用户数 | 次7日留存用户数  |  dt（成为新用户日期） |     
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |     
 | 61132 | 5054 | 4284 | 3492 | 3209 | 3202 | 2929 | 2116 | 20190101 |     
+```hql
+select count(distinct user.user_id)                   as new_users,
+       count(case when tmp.gap = 1 then 1 else 0 end) as save_1,
+       count(case when tmp.gap = 2 then 1 else 0 end) as save_2,
+       count(case when tmp.gap = 3 then 1 else 0 end) as save_3,
+       count(case when tmp.gap = 4 then 1 else 0 end) as save_4,
+       count(case when tmp.gap = 5 then 1 else 0 end) as save_5,
+       count(case when tmp.gap = 6 then 1 else 0 end) as save_6,
+       count(case when tmp.gap = 7 then 1 else 0 end) as save_7,
+       '20190101'                                     as dt
+from (
+         select user.user_id,
+                (case when log.dt is null then -1 else datediff(date_format(log.dt, 'yyyy-MM-dd'), '2019-09-01') end) as gap
+         from (
+                  --'2019-09-01'的新用户
+                  select *
+                  from dim_tb_user
+                  where date_format(create_time, 'yyyy-MM-dd') = '2019-09-01'
+              ) user
+              left join
+              (
+                --'2019-09-02'及以后每天的用户访问日志
+                select * from fact_access_log
+                where dt > 20190901 and date_format(create_time, 'yyyy-MM-dd') > '2019-09-01'
+              ) log
+         on user.user_id = log.user_id
+         group by user.user_id,
+             datediff(date_format(log.dt, 'yyyy-MM-dd'), '2019-09-01')
+     ) tmp
+group by '20190101';
+```
+
 
 2.假设本次活动拉新留存情况符合预期，公司决定后续会不定期举办拉新活动，    
 以获得更多新用户，结合你所掌握的数仓知识，设计调度任务，使得报表按天增量更新，帮助公司长期监控平台每一天的新用户留存。   
