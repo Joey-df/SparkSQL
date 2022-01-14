@@ -7,7 +7,7 @@ FROM student
 JOIN score a ON  a.c_id='01'
 JOIN score b ON  b.c_id='02'
 WHERE  a.s_id = student.s_id 
-  AND b.s_id  =student.s_id AND a.s_score > b.s_score;
+  AND b.s_id = student.s_id AND a.s_score > b.s_score;
 ```
 
 2.查询"01"课程比"02"课程成绩低的学生的信息及课程分数
@@ -225,6 +225,9 @@ where student.s_id = score.s_id
   and c_id = '01'
 order by s_score desc;
 ```
+>注意：表之间用逗号(,)连接和 inner join 是一样的   
+ select * from table_a,table_b where table_a.id=table_b.id;    
+ 它们的执行效率没有区别，只是书写方式不同，用逗号是sql 89标准，join 是sql 92标准。用逗号连接后面过滤条件用 where ，用 join 连接后面过滤条件是 on。  
 
 17.按平均成绩从高到低显示所有学生的所有课程的成绩以及平均成绩
 ```hql

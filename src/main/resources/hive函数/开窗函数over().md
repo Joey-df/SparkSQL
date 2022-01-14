@@ -4,7 +4,7 @@
 ```html
 https://cwiki.apache.org/confluence/display/Hive/LanguageManual+WindowingAndAnalytics
 ```
-
+窗口函数又叫OLAP函数/分析函数，  
 over() 才是窗口函数，而sum、row_number、count等只是与over()搭配的分析函数，当然除了这三个函数还有其他的函数。  
 >over()窗口函数的语法结构如下        
 分析函数 over(partition by 列名 order by 列名 rows between 开始位置 and 结束位置)
@@ -50,6 +50,16 @@ ROWS BETWEEN 2 PRECEDING AND 1 CURRENT ROW（表示往前2行到当前行）
 ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING（表示当前行到终点）
 
 后面会有具体应用的示例。  
+
+## 常见聚合函数 + over()
+hive支持 count(),max(),min(),sum(),avg() 等常用的聚合函数
+>注意：  
+ 聚合操作时要注意null值    
+ count(*) 包含null值，统计所有行数    
+ count(id) 不包含null值    
+ min 求最小值是不包含null，除非所有值都是null    
+ avg 求平均值也是不包含null    
+
 
 ## sum() over() 
 数据：  
@@ -130,7 +140,7 @@ where tmp.rn = 1;
 +---+----------------+---+
 ```
 
-## rank和dense_rank 
+## rank() 和 dense_rank() 
 1、rank对查询出来的记录进行排名。与row_number函数不同的是，rank函数考虑到了over子句中排序字段值相同的情况，如果使用rank函数来生成序号，over子句中排序字段值相同的序号是一样的，
 后面字段值不相同的序号将跳过相同的排名号排下一个，也就是相关行之前的排名数加一，可以理解为根据当前的记录数生成序号，后面的记录依此类推。  
 2、dense_rank功能与rank函数类似，但dense_rank函数在生成序号时是连续的。dense_rank函数出现相同排名时，将不跳过相同排名号。  
@@ -178,7 +188,7 @@ rank：当出现相同的排序时，中间会出现一个空缺，即分组内�
 dense_rank：当出现相同排序时，中间不会出现空缺，即分组内可能会出现同样的次序，且排序名次是连续的。1,1,1,2,3,4,4,5...  
 
 
-## first_value()  over() 获取数据窗口的第一行某字段值
+## first_value() over() 获取数据窗口的第一行某字段值
 含义：取分组内排序后，截止到当前行，第一个值。  
 示例：按部门分组，统计每个部门员工工资以及该部门最低的员工工资。  
 数据（后面几个开窗函数也会用到这些数据）：  
