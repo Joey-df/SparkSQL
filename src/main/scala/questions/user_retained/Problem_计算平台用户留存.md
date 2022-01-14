@@ -123,3 +123,24 @@ CREATE TABLE if NOT EXISTS reporting_new_user_retain_day
 | 61132 | 3054 | 2284 | 1398 | 1009 | 872 | 768 | 673 | 20190101 |    
 | 30206 | 3021 | 2165 | 1397 | 971 | 873 | 567 | 499 | 20181231 |    
 | ... | ... | ... | ... | ... | ... | ... | ... | ... |   
+```hql
+SELECT DATE_FORMAT(t1.create_time, "yyyy-MM-dd")                                                                    as dt,
+       count(distinct t1.user_id)                                                                                   as new_cnt,
+       COUNT(CASE WHEN DATEDIFF(DATE_FORMAT(t1.create_time, "yyyy-MM-dd"), t2.create_time) = 1 THEN t1.USER_id END) as retain_1,
+       COUNT(CASE WHEN DATEDIFF(DATE_FORMAT(t1.create_time, "yyyy-MM-dd"), t2.create_time) = 2 THEN t1.USER_id END) as retain_2,
+       COUNT(CASE WHEN DATEDIFF(DATE_FORMAT(t1.create_time, "yyyy-MM-dd"), t2.create_time) = 3 THEN t1.USER_id END) as retain_3,
+       COUNT(CASE WHEN DATEDIFF(DATE_FORMAT(t1.create_time, "yyyy-MM-dd"), t2.create_time) = 4 THEN t1.USER_id END) as retain_4,
+       COUNT(CASE WHEN DATEDIFF(DATE_FORMAT(t1.create_time, "yyyy-MM-dd"), t2.create_time) = 5 THEN t1.USER_id END) as retain_5,
+       COUNT(CASE WHEN DATEDIFF(DATE_FORMAT(t1.create_time, "yyyy-MM-dd"), t2.create_time) = 6 THEN t1.USER_id END) as retain_6,
+       COUNT(CASE WHEN DATEDIFF(DATE_FORMAT(t1.create_time, "yyyy-MM-dd"), t2.create_time) = 7 THEN t1.USER_id END) as retain_7
+FROM dim_tb_user t1
+         LEFT JOIN
+     (
+         SELECT user_id,
+                DATE_FORMAT(create_time, "yyyy-MM-dd") AS create_time
+         FROM fact_access_log
+         GROUP BY user_id, DATE_FORMAT(create_time, "yyyy-MM-dd")
+     ) t2
+     ON t1.user_id = t2.user_id
+GROUP BY DATE_FORMAT(t1.create_time, "yyyy-MM-dd");
+```
