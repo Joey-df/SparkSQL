@@ -17,3 +17,7 @@ https://blog.csdn.net/a934079371/article/details/108301730
 
 Hive-SQL工作中常用函数总结及案例实战(重点)
 https://blog.csdn.net/godlovedaniel/article/details/104977785
+
+
+SQL练习
+https://zhuanlan.zhihu.com/p/269591146
