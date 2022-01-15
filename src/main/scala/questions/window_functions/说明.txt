@@ -21,3 +21,6 @@ https://blog.csdn.net/godlovedaniel/article/details/104977785
 
 SQL练习
 https://zhuanlan.zhihu.com/p/269591146
+
+【数据分析面试】大厂高频SQL笔试题（四）
+https://www.jianshu.com/p/07a410bf5bbf
