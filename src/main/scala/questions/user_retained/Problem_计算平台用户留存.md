@@ -20,7 +20,8 @@ CREATE TABLE if NOT EXISTS fact_access_log
     user_id     BIGINT COMMENT "用户id",
     page_url    STRING COMMENT "网站页面路径,用于标记不同页面",
     create_time STRING COMMENT "访问时间,如：2019-01-01 08:00:01"
-) COMMENT "用户访问日志表" PARTITIONED by (dt STRING COMMENT "格式：yyyymmdd ,数值与create_time转化后的日期一致";
+) COMMENT "用户访问日志表"
+    PARTITIONED by (dt STRING COMMENT "格式：yyyymmdd ,数值与create_time转化后的日期一致");
 ```
 dim_tb_user: 总量数百万行级别   
 | user_id | create_time  |    
@@ -109,7 +110,8 @@ CREATE TABLE if NOT EXISTS reporting_new_user_retain_day
     retain5 BIGINT COMMENT "次5日留存用户数",
     retain6 BIGINT COMMENT "次6日留存用户数",
     retain7 BIGINT COMMENT "次7日留存用户数"
-) COMMENT "新增用户留存报表" PARTITIONED by (dt STRING COMMENT "格式：yyyymmdd ,成为新用户的日期";
+) COMMENT "新增用户留存报表"
+    PARTITIONED by (dt STRING COMMENT "格式：yyyymmdd ,成为新用户的日期");
 ```
 | new_cnt | retain1  | retain2  |  retain3 | retain4  | retain5  |  retain6 | retain7  | dt |     
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |     
