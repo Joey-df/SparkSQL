@@ -17,7 +17,7 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
  * insert into score_info values
  * ("Jim",90,88,99);
  */
-object SQL_列转行2_ans {
+object SQL_行列转换2_答案 {
 
   def main(args: Array[String]): Unit = {
 
@@ -35,26 +35,46 @@ object SQL_列转行2_ans {
       ("Jim",90,88,99)
     ).toDF("name","english","maths","music")
 
-    df1.createTempView("score_info")
+    df1.createTempView("tableA")
     ss.sql(
       """
-        | select * from score_info
+        | select * from tableA
         |""".stripMargin)
       .show()
 
-    //方法1：使用union
+    //todo
+//    //方法1：使用union
+//    ss.sql(
+//      """
+//        |
+//        |""".stripMargin)
+//      .show()
+//
+//    //方法2：使用explode函数
+//    ss.sql(
+//      """
+//        |
+//        |""".stripMargin)
+//      .show()
+
+
+
+
+
+    val df2: DataFrame = List(
+      ("Jim","english",90),
+      ("Jim","maths",88),
+      ("Jim","music",99)
+    ).toDF("name","subject","score")
+
+    df2.createTempView("tableB")
     ss.sql(
       """
-        |
+        | select * from tableB
         |""".stripMargin)
       .show()
 
-    //方法2：使用explode函数
-    ss.sql(
-      """
-        |
-        |""".stripMargin)
-      .show()
+    //todo
   }
 
 }

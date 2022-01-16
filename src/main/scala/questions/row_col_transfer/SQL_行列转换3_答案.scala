@@ -10,7 +10,7 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
  *  str_to_map(str,",",":")
  *  if(exp, true_res, false_res)
  */
-object SQL_行列转换3 {
+object SQL_行列转换3_答案 {
 
   def main(args: Array[String]): Unit = {
 
