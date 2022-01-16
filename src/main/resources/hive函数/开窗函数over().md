@@ -78,7 +78,6 @@ hive支持 count(),max(),min(),sum(),avg() 等常用的聚合函数
 ```
 sum() over()应用的SQL：  
 ```hql
-
 SELECT id,        
        date,       
        pv,
@@ -94,7 +93,7 @@ SELECT id,
        SUM(pv) OVER(PARTITION BY id ORDER BY date ROWS BETWEEN 3 PRECEDING AND 1 FOLLOWING) AS pv5,    
        ---当前行+往后所有行S
        UM(pv) OVER(PARTITION BY id ORDER BY date ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING) AS pv6    
-  FROM data;
+FROM data;
 ```
 运行结果：
 ```hql
@@ -181,8 +180,9 @@ rank值紧接上一次的rank值。在各个分组内，rank()是跳跃排序，
 
 row_number、rank和dense_rank的对比：  
 
-相同点：都是分组排序  
-不同点：  
+**相同点：**   
+都是分组排序     
+**不同点：**  
 row_number：即便出现相同的排序，排名也不会一致，只会进行累加；集 会根据顺序计算（顺序编号，经常使用，唯一标记一条记录）。1,2,3,4,5...  
 rank：当出现相同的排序时，中间会出现一个空缺，即分组内会出现同一个排名，但是排名次序是不连续的。1,1,3,4,4,6...  
 dense_rank：当出现相同排序时，中间不会出现空缺，即分组内可能会出现同样的次序，且排序名次是连续的。1,1,1,2,3,4,4,5...  
@@ -284,7 +284,7 @@ FROM data;
 |richard|3      |9000  |9000 |
 +-------+-------+------+-----+
 ```
-此外：
+此外：   
 RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW：为默认值，即当指定了ORDER BY从句，而省略了window从句 ，表示从开始到当前行（当前行永远是最后一个值）。  
 RANGE BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING：表示从当前行到最后一行。  
 RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING：表示所有行。  
