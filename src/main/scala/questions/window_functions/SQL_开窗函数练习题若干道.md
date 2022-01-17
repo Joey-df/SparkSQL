@@ -67,7 +67,7 @@ group by name;
 |jack|       1|
 |mart|       4|
 +----+--------+
---sql执行顺序：from、where、group by、count(*)
+--sql执行顺序：from、where、group by、count(*)、select
 ```
 ④ 查询在2017年4月份购买过的顾客及总人数
 ```hql
@@ -122,7 +122,7 @@ userMonthSum是每个用户的月购买总额。
 ```
 **注意点：**
 order by子句会让输入的数据强制排序，order By子句对于诸如row_Number()，Lead()，LAG()等函数是必须的，因为如果数据无序，这些函数的结果就没有任何意义。  
-- 如果只使用partition by子句,未指定order by的话,我们的分析函数的作用范围是分组内的数据【**此时相当于group by + 聚合函数函数，如 monthSum1**】.  
+- 如果只使用partition by子句,未指定order by的话，我们的分析函数的作用范围是分组内的数据【**此时相当于group by + 聚合函数函数，如 monthSum1**】。     
 - 使用了order by子句,默认数据分析范围是从起点到当前行，往往用来实现累加.  
 
 #### 3）查询顾客的购买明细及到目前为止每个顾客购买总金额
@@ -159,7 +159,7 @@ from business;
 +----+----------+----+-------+-------+-------+-------+-------+-------+-------+
 ```
 
-#### 4）查询顾客上次的购买时间----lag(x,n)over()和lead(x,n)over()偏移量分析函数的运用
+#### 4）查询顾客上次的购买时间----lag(x,n) over()和lead(x,n) over() 偏移量分析函数的运用
 ```hql
 select name,
        orderdate,
@@ -291,12 +291,98 @@ from (
 +--------+------+-----+
 ```
 #### 1、使用 over() 函数进行数据统计, 统计每个用户及表中数据的总数
+```hql
+select userid,
+       logday,
+       score,
+       count(*) over ()                    count_all,     --表中数据总数
+       count(*) over (partition by userid) count_cur_user --每个用户数据总数
+from log_info;
+结果：
++------+--------+-----+---------+--------------+
+|userid|  logday|score|count_all|count_cur_user|
++------+--------+-----+---------+--------------+
+| 11111|20191020|   85|       11|             4|
+| 11111|20191021|   87|       11|             4|
+| 11111|20191022|   67|       11|             4|
+| 11111|20191023|   99|       11|             4|
+| 22222|20191020|   83|       11|             4|
+| 22222|20191021|   65|       11|             4|
+| 22222|20191022|   34|       11|             4|
+| 22222|20191023|   33|       11|             4|
+| 33333|20191020|   86|       11|             3|
+| 33333|20191021|   98|       11|             3|
+| 33333|20191022|   88|       11|             3|
++------+--------+-----+---------+--------------+
 
+```
 #### 2、求用户明细并统计每天的用户总数
-
-#### 3、计算从第一天到现在的所有 score 大于80分的用户总数
-
-#### 4、计算每个用户到当前日期分数大于80的天数
+```hql
+select userid,
+       logday,
+       score,
+       count(*) over (partition by logday) count_cur_day
+from log_info;
+结果：
++------+--------+-----+-------------+
+|userid|  logday|score|count_cur_day|
++------+--------+-----+-------------+
+| 11111|20191020|   85|            3|
+| 22222|20191020|   83|            3|
+| 33333|20191020|   86|            3|
+| 11111|20191021|   87|            3|
+| 22222|20191021|   65|            3|
+| 33333|20191021|   98|            3|
+| 11111|20191022|   67|            3|
+| 22222|20191022|   34|            3|
+| 33333|20191022|   88|            3|
+| 11111|20191023|   99|            2|
+| 22222|20191023|   33|            2|
++------+--------+-----+-------------+
+```
+#### 3、计算从第一天到现在的 所有 score 大于80分的记录总数
+```hql
+select *,
+       count(1) over (order by logday)                                                    cur_total1,
+       count(1) over (order by logday rows between unbounded preceding and current row) as cur_total2
+from log_info
+where score > 80;
+结果：
++--------+------+-----+----------+----------+
+|  logday|userid|score|cur_total1|cur_total2|
++--------+------+-----+----------+----------+
+|20191020| 11111|   85|         3|         1|
+|20191020| 22222|   83|         3|         2|
+|20191020| 33333|   86|         3|         3|
+|20191021| 11111|   87|         5|         4|
+|20191021| 33333|   98|         5|         5|
+|20191022| 33333|   88|         6|         6|
+|20191023| 11111|   99|         7|         7|
++--------+------+-----+----------+----------+
+注意 cur_total1 和 cur_total2 的区别！！！
+```
+#### 4、计算每个用户到当前日期分数大于80的 天数（记录数）
+```hql
+select userid,
+       logday,
+       score,
+       count(1) over (partition by userid order by logday asc)                                                   cur_cnt1,
+       count(1) over (partition by userid order by logday asc rows between unbounded preceding and current row ) cur_cnt2
+from log_info
+where score > 80;
+结果：
++------+--------+-----+--------+--------+
+|userid|  logday|score|cur_cnt1|cur_cnt2|
++------+--------+-----+--------+--------+
+| 11111|20191020|   85|       1|       1|
+| 11111|20191021|   87|       2|       2|
+| 11111|20191023|   99|       3|       3|
+| 22222|20191020|   83|       1|       1|
+| 33333|20191020|   86|       1|       1|
+| 33333|20191021|   98|       2|       2|
+| 33333|20191022|   88|       3|       3|
++------+--------+-----+--------+--------+
+```
 
 
 ## 第三题
@@ -321,8 +407,65 @@ from (
 +----+-------+-----+
 ```
 #### 1、每门学科学生成绩排名(是否并列排名、空位排名三种实现)
-    
-#### 2、每门学科成绩排名top n的学生
+```hql
+select name,
+       subject,
+       score,
+       row_number() over (partition by subject order by score desc) as rn,
+       rank() over (partition by subject order by score desc)       as rank,
+       dense_rank() over (partition by subject order by score desc) as d_rank
+from score_info;
+结果：
++----+-------+-----+---+----+------+
+|name|subject|score| rn|rank|d_rank|
++----+-------+-----+---+----+------+
+| 孙悟空|     数学|   95|  1|   1|     1|
+|  宋宋|     数学|   86|  2|   2|     2|
+|  婷婷|     数学|   85|  3|   3|     3|
+|  大海|     数学|   56|  4|   4|     4|
+|  大海|     英语|   84|  1|   1|     1|
+|  宋宋|     英语|   84|  2|   1|     1|
+|  婷婷|     英语|   78|  3|   3|     2|
+| 孙悟空|     英语|   68|  4|   4|     3|
+|  大海|     语文|   94|  1|   1|     1|
+| 孙悟空|     语文|   87|  2|   2|     2|
+|  婷婷|     语文|   65|  3|   3|     3|
+|  宋宋|     语文|   64|  4|   4|     4|
++----+-------+-----+---+----+------+
+```    
+#### 2、每门学科成绩排名top 3的学生
+```hql
+select name,
+       subject,
+       score,
+       rn,
+       rank,
+       d_rank
+from (
+         select name,
+                subject,
+                score,
+                row_number() over (partition by subject order by score desc) as rn,
+                rank() over (partition by subject order by score desc)       as rank,
+                dense_rank() over (partition by subject order by score desc) as d_rank
+         from score_info
+     ) tmp
+where rank <= 3; -- 或者rn<=3
+结果：
++----+-------+-----+---+----+------+
+|name|subject|score| rn|rank|d_rank|
++----+-------+-----+---+----+------+
+| 孙悟空|     数学|   95|  1|   1|     1|
+|  宋宋|     数学|   86|  2|   2|     2|
+|  婷婷|     数学|   85|  3|   3|     3|
+|  大海|     英语|   84|  1|   1|     1|
+|  宋宋|     英语|   84|  2|   1|     1|
+|  婷婷|     英语|   78|  3|   3|     2|
+|  大海|     语文|   94|  1|   1|     1|
+| 孙悟空|     语文|   87|  2|   2|     2|
+|  婷婷|     语文|   65|  3|   3|     3|
++----+-------+-----+---+----+------+
+```
 
 ## 第四题
 出处 https://www.jianshu.com/p/07a410bf5bbf   
@@ -356,11 +499,39 @@ from (
 需求：每个商品浏览次数top3 的 用户信息，输出商品id、用户id、浏览次数。  
 ```
 ##### 思路：
-第1步：计算每个商品被每个用户浏览的次数    
-第2步：每个商品被浏览次数排名  
-第3步：计算每个商品浏览前3的用户   
+第1步：计算每个商品 被 每个用户 浏览的次数    
+第2步：每个商品被浏览次数排名    
+第3步：计算每个商品浏览前3的用户     
 ```hql
-
+select *
+from (
+         select user_id,
+                product_id,
+                view_cnt,
+                rank() over (partition by product_id order by view_cnt desc) rn
+         from (
+                  select user_id,
+                         product_id,
+                         count(1) view_cnt
+                  from product_view
+                  group by user_id, product_id
+              ) t1 -- 每个商品 被 每个用户 浏览的次数  信息表
+     ) t2 -- 每个商品被浏览次数排名  
+where rn <= 3;
+结果：
++-------+----------+--------+---+
+|user_id|product_id|view_cnt| rn|
++-------+----------+--------+---+
+|  A0001| product_a|       3|  1|
+|  A0005| product_a|       3|  2|
+|  A0002| product_a|       2|  3|
+|  A0001| product_b|       2|  1|
+|  A0004| product_b|       2|  2|
+|  A0002| product_b|       1|  3|
+|  A0002| product_c|       2|  1|
+|  A0003| product_c|       1|  2|
+|  A0006| product_c|       1|  3|
++-------+----------+--------+---+
 ```
 
 

@@ -47,6 +47,26 @@ object SQL_开窗函数练习题若干道_4 {
         |select * from product_view
         |""".stripMargin).show()
 
+    //每个商品浏览次数top3 的 用户信息，输出商品id、用户id、浏览次数。
+    ss.sql(
+      """
+        |select *
+        |from (
+        |         select user_id,
+        |                product_id,
+        |                view_cnt,
+        |                rank() over (partition by product_id order by view_cnt desc) rn
+        |         from (
+        |                  select user_id,
+        |                         product_id,
+        |                         count(1) view_cnt
+        |                  from product_view
+        |                  group by user_id, product_id
+        |              ) t1 --用户浏览商品次数 信息表
+        |     ) t2
+        |where rn <= 3
+        |""".stripMargin).show()
+
   }
 
 }

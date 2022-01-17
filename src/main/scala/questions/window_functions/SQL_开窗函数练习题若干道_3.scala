@@ -2,10 +2,10 @@ package questions.window_functions
 
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
-//1、使用 over() 函数进行数据统计, 统计每个用户及表中数据的总数
-//2、求用户明细并统计每天的用户总数
-//3、计算从第一天到现在的所有 score 大于80分的用户总数
-//4、计算每个用户到当前日期分数大于80的天数
+//原始数据(学生成绩信息)表score_info
+//三个字段 name、subject、score
+//1、每门学科学生成绩排名(是否并列排名、空位排名三种实现)
+//2、每门学科成绩排名top 3的学生
 object SQL_开窗函数练习题若干道_3 {
 
   def main(args: Array[String]): Unit = {
@@ -41,6 +41,38 @@ object SQL_开窗函数练习题若干道_3 {
         |select * from score_info
         |""".stripMargin).show()
 
+    //1、每门学科学生成绩排名(是否并列排名、空位排名三种实现)
+    ss.sql(
+      """
+        |select name,
+        |       subject,
+        |       score,
+        |       row_number() over (partition by subject order by score desc) as rn,
+        |       rank() over (partition by subject order by score desc)       as rank,
+        |       dense_rank() over (partition by subject order by score desc) as d_rank
+        |from score_info
+        |""".stripMargin).show()
+
+    //2、每门学科成绩排名top 3的学生
+    ss.sql(
+      """
+        |select name,
+        |       subject,
+        |       score,
+        |       rn,
+        |       rank,
+        |       d_rank
+        |from (
+        |         select name,
+        |                subject,
+        |                score,
+        |                row_number() over (partition by subject order by score desc) as rn,
+        |                rank() over (partition by subject order by score desc)       as rank,
+        |                dense_rank() over (partition by subject order by score desc) as d_rank
+        |         from score_info
+        |     ) tmp
+        |where rank <= 3
+        |""".stripMargin).show()
   }
 
 }
