@@ -17,6 +17,6 @@ object SQL_wordcount {
 
   //先创建一个只有一列的表word_info，列名为word：
   def main(args: Array[String]): Unit = {
-
+    //todo
   }
 }

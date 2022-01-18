@@ -6,9 +6,9 @@
 
 3.where
 
-4.group by  （开始使用select中的别名，从group 开始往后都可用）
+4.group by
 
-5.聚合函数 如sum() / max() min() / collect_list() / avg()  count(1)等
+5.聚合函数 如sum() / max() min() / collect_list() / avg() / count(1)等
 
 6.having 对聚合后的结果进行过滤
 

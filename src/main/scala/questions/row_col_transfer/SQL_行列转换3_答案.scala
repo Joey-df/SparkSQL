@@ -39,7 +39,36 @@ object SQL_行列转换3_答案 {
         |""".stripMargin)
       .show()
 
-    //TODO
+    //tableA 转 tableB
+    ss.sql(
+      """
+        |select qq,
+        |       concat_ws('_', collect_list(game)) game_list
+        |from tableA
+        |group by qq
+        |""".stripMargin).show()
+
+    val df2: DataFrame = List(
+      (10000,"a_b_c"),
+      (20000,"c_d"),
+      (30000,null)
+    ).toDF("qq","game")
+
+    df2.createTempView("tableB")
+    ss.sql(
+      """
+        | select * from tableB
+        |""".stripMargin)
+      .show()
+
+    //tableB 转 tableA
+    //注意有无outer的区别
+    ss.sql(
+      """
+        |select qq,
+        |       sub_game
+        |from tableB lateral view outer explode(split(game, '_')) tf as sub_game
+        |""".stripMargin).show()
   }
 
 }

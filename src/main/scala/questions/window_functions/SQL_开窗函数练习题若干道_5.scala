@@ -38,6 +38,7 @@ object SQL_开窗函数练习题若干道_5 {
         |select * from score_info
         |""".stripMargin).show()
 
+    //todo
   }
 
 }

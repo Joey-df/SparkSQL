@@ -17,7 +17,7 @@ object Problem_找出相同数字出现次数超过5次的手机号码 {
     import ss.implicits._
 
     val df1: DataFrame = List(
-      ("jimmhe", "18191512076"),
+      ("jimmhe", "1111122222"),
       ("xiaosong", "18392988059"),
       ("jingxianghua", "181188188"),
       ("donghualing", "17191919999")
@@ -25,7 +25,26 @@ object Problem_找出相同数字出现次数超过5次的手机号码 {
 
     df1.createTempView("user_info")
 
-    //todo
+    ss.sql(
+      """
+        |select name,
+        |       tel
+        |from (
+        |         select name,
+        |                tel,
+        |                num,
+        |                count(1) as cnt
+        |         from (
+        |                  select name,
+        |                         tel,
+        |                         num
+        |                  from user_info lateral view explode(split(tel, "")) tf as num
+        |              ) t0
+        |         group by name, tel, num
+        |         having count(1) >= 5
+        |     ) t1
+        |group by name, tel -- 最后一步去重，防止1111122222这种号码
+        |""".stripMargin).show()
 
   }
 

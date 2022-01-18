@@ -51,6 +51,8 @@ object SQL_行转列4 {
     //方法1 str_to_map + concat_ws + collect_list
 
     //方法2 if 或 case when
+
+    //todo
   }
 
 }

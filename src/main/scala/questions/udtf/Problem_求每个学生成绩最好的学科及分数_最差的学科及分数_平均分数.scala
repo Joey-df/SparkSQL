@@ -46,7 +46,7 @@ object Problem_求每个学生成绩最好的学科及分数_最差的学科及�
         |         select name,
         |                course,
         |                score
-        |         from info lateral view explode(str_to_map(score_map,",",":")) tf as course, score
+        |         from info lateral view posexplode(str_to_map(score_map,",",":")) tf as pos, course, score
         |     ) tmp
         |group by name
         |

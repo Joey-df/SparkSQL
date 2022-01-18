@@ -64,6 +64,8 @@ object SQL_开窗函数练习题若干道_7 {
       """
         |select * from act_join
         |""".stripMargin).show()
+
+    //todo
   }
 
 }
