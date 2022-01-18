@@ -7,11 +7,11 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
  * 给一个表, 有 ID 和 PARENT_ID 两个字段, 然后求某ID的所有子结点
  *
  * ID  PARENT_ID
- * 900   NULL
- * 9011 901
- * 9012 901
- * 9013 9012
- * 9014 9013
+ * 900    NULL
+ * 9011   901
+ * 9012   901
+ * 9013   9012
+ * 9014   9013
  *
  * 求 901 的所有子结点
  * 结果为：
@@ -20,6 +20,7 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
  * 9013
  * 9014
  */
+//出处 https://www.yuque.com/wanglegebo/zb3id0/gblcx7
 object Problem_0005_类似递归求所有子节点 {
 
   def main(args: Array[String]): Unit = {
@@ -48,33 +49,15 @@ object Problem_0005_类似递归求所有子节点 {
         | select * from table_info
         |""".stripMargin).show()
 
-    ss.sql(
-      """
-        |select ID from (
-        |    select *
-        |    from table_info
-        |    where PARENT_ID = '901'
-        |
-        |    union all
-        |
-        |    select old.*
-        |    from table_info new,
-        |         table_info old
-        |    where new.ID = old.PARENT_ID
-        |)
-        |""".stripMargin).show()
 
-    //此方法有问题
-    ss.sql(
-      """
-        |select ID
-        |from table_info
-        |where PARENT_ID = '901'
-        |union all
-        |select second.ID
-        |from table_info first
-        |         join (select * from table_info) second on first.ID = second.PARENT_ID
-        |""".stripMargin).show()
+    //with temp as(
+    //    select * from table_info where PARENT_ID = '901'
+    //    union all
+    //    select t0.* from temp, table_info t0 where temp.ID = t0.PARENT_ID
+    //);
+    //
+    //select ID from temp;
+
   }
 
 }
