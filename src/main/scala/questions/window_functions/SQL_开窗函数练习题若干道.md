@@ -644,11 +644,69 @@ https://blog.csdn.net/licent2011/article/details/121370208
 需求：      
 1、统计每个活动报名的所有用户在报名后产生的总订单金额，总订单数。（每个用户限报一个活动,且默认用户报名后产生的订单均为参加活动的订单）。      
 ```hql
+思路：
+计算总订单金额和总订单数，这两个指标都比较简单sum(order_sales)、count(order_id)就可以，
+但是关键在于限定条件，是每个活动报名后的用户的汇总，必须是报名了某个活动，且必须在活动开始后的数据统计。
+可以通过订单表orders和报名表act_join连接，限定订单时间大于等于活动的开始时间即可。
+select act_id,
+       sum(order_sales) sum_sales,
+       count(order_id)  order_cnt
+from (
+         select act_id,
+                t1.user_id,
+                join_time,
+                order_id,
+                order_sales,
+                order_time
+         from act_join t1 inner join orders t2 on t1.user_id = t2.user_id
+         where t2.order_time >= t1.join_time
+     ) t0
+group by act_id;
 
+结果：
++------+---------+---------+
+|act_id|sum_sales|order_cnt|
++------+---------+---------+
+|act_01|      620|        4|
+|act_02|      770|        3|
+|act_03|      620|        3|
++------+---------+---------+
 ```
 2、统计每个活动从开始后到当天（数据统计日）平均每天产生的订单数，活动开始时间定义为最早有用户报名的时间。      
 ```hql
+思路：
+与第1问有相似之处，同样是用户报名后的下单，
+只是多了一些限定条件：同时要满足要小于等于计算日期当天，也就是程序运行的系统时间now()，
+在此基础上，计算整体的订单数，除以活动进行的天数，就是该活动每天的平均下单数。
+select t1.act_id,
+       count(order_id) / datediff(now(), min(t1.begin_time)) --总订单数/活动天数
+from (
+         select act_id,
+                user_id,
+                join_time,
+                min(join_time) over (partition by act_id) as begin_time --当前活动的开始时间(最早有用户报名的时间)
+         from act_join
+     ) t1
+         inner join
+     (
+         select user_id,
+                order_id,
+                order_time
+         from orders
+     ) t2
+     on t1.user_id = t2.user_id
+where t1.join_time between t1.begin_time and now() --活动开始至今的数据
+  and t2.order_time >= t1.join_time                --活动开始后的下单
+group by t1.act_id;
 
+结果：
++------+------------------------------------------------------------------------------------------------------------------------------+
+|act_id|(CAST(count(order_id) AS DOUBLE) / CAST(datediff(CAST(current_timestamp() AS DATE), CAST(min(begin_time) AS DATE)) AS DOUBLE))|
++------+------------------------------------------------------------------------------------------------------------------------------+
+|act_01|                                                                                                           0.01639344262295082|
+|act_02|                                                                                                          0.012658227848101266|
+|act_03|                                                                                                           0.01276595744680851|
++------+------------------------------------------------------------------------------------------------------------------------------+
 ```
 
 ## 第八题 计算用户累计成单达到一定金额的时间
