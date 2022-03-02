@@ -57,7 +57,7 @@ object SQL_开窗函数练习题若干道_2 {
         |select userid,
         |       logday,
         |       score,
-        |       count(1) over (partition by logday) count_cur_day
+        |       count(1) over (partition by logday) count_cur_day  -- 每天的用户总数
         |from log_info
         |""".stripMargin).show()
 

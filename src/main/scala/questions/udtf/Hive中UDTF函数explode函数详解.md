@@ -5,16 +5,16 @@
 https://cwiki.apache.org/confluence/display/Hive/LanguageManual+UDF  
 ```
 
-Hive中的函数分为3类,UDF函数、UDAF函数、UDTF函数  
+Hive中的函数分为3类：UDF函数、UDAF函数、UDTF函数  
 1. UDF：一进一出  
 2. UDAF：聚集函数，多进一出，类似于：count/max/min **（行转列 多行变一行）**
 3. UDTF：一进多出,如explore()、posexplode()，UDTF函数的时候只允许一个字段 **（列转行 一行变多行）**
 
 当我们百度搜索explode()时，经常会出现lateral view + explode相关的文章，很少单独写explode()。  
 分别了解ecplode() 与lateral view的各自作用很重要，不然过程都不知道实现的，换个UDTF函数就不会使用了。  
-而大部分文章都是explode()与lateral view一起讲解,当我们都不会使用UDTF函数时，不理解该类函数时，不知道仅UDTF函数如何使用、我们也不会真正的使用。  
+而大部分文章都是explode()与lateral view一起讲解，当我们都不会使用UDTF函数时，不理解该类函数时，不知道仅UDTF函数如何使用、我们也不会真正的使用。  
 
-所以先看第一部分吧
+所以先看第一部分吧。
 
 ## 一、UDTF函数 explode() 讲解
 UDTF函数作用都是输入一行数据，将该行数据拆分、并返回多行数据。不同的UDTF函数只是拆分的原理不同、作用的数据格式不同而已。 
@@ -26,8 +26,8 @@ explode()将一行数据转换成多行数据，**（transform a single input ro
 Desc: Explodes an array to multiple rows. Returns a row-set with a single column (col), one row for each element from the array.  
 ```hql
 select explode(arraycol) as newcol from tablename;
-#arraycol：arrary数据类型的字段。
-#tablename：表名
+arraycol：arrary数据类型的字段。
+tablename：表名
 
 select explode(array('A','B','C'));
 select explode(array('A','B','C')) as col;
@@ -60,8 +60,8 @@ explode()用于map类型的数据时，由于map是kay-value结构的，所以�
 ## 二、百度搜索explode()，总会出现lateral view，它们各自的作用是什么？
 第一部分对explode()函数做了简单的讲解，知道它作用的数据格式为array和map ,也知道了如何单独使用explode，可能脑袋还是有点懵，下面将结合案例一起学习。  
 
-UDTF函数(如：explode)只能只允许对拆分字段进行访问，即select时只能出现explode作用的字段，不能在选择表中其它的字段，否则会报错。  
-但是实际中需求中经常要拆某个字段,然后一起与别的字段一起取。这时就要使用lateral view。  
+UDTF函数(如：explode)只能允许对拆分字段进行访问，即select时只能出现explode作用的字段，不能在选择表中其它的字段，否则会报错。  
+但是实际中需求中经常要拆某个字段，然后一起与别的字段一起取。这时就要使用lateral view。  
 
 **lateral view为侧视图**,其实就是用来和像类似explode这种UDTF函数联用的，**lateral view会将UDTF生成的结果放到一个虚拟表中**，然后**这个虚拟表会和输入行进行join**来达到连接UDTF外的select字段的目的。  
 

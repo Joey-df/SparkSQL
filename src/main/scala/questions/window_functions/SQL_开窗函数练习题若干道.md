@@ -95,7 +95,7 @@ select name,
        cost,
        sum(cost) over (partition by month(orderdate) )   monthSum1, --可以理解为group by + sum
        sum(cost) over (partition by month(orderdate) order by orderdate rows between unbounded preceding and unbounded following) monthSum2,
-       sum(cost) over (partition by name,month(orderdate) order by orderdate rows between unbounded preceding and unbounded following) userMonthSum
+       sum(cost) over (partition by name, month(orderdate) order by orderdate rows between unbounded preceding and unbounded following) userMonthSum
 from business;
 结果：
 +----+----------+----+---------+---------+------------+
@@ -121,9 +121,9 @@ monthSum2：加上了order by子句，表示组内数据累加，其数据的分
 userMonthSum是每个用户的月购买总额。  
 ```
 **注意点：**
-order by子句会让输入的数据强制排序，order By子句对于诸如row_Number()，Lead()，LAG()等函数是必须的，因为如果数据无序，这些函数的结果就没有任何意义。  
-- 如果只使用partition by子句,未指定order by的话，我们的分析函数的作用范围是分组内的数据【**此时相当于group by + 聚合函数函数，如 monthSum1**】。     
-- 使用了order by子句,默认数据分析范围是从起点到当前行，往往用来实现累加.  
+**order by子句会让输入的数据强制排序，order by子句对于诸如row_number()，Lead()，LAG()等函数是必须的，因为如果数据无序，这些函数的结果就没有任何意义**。  
+- 如果只使用partition by子句，未指定order by的话，我们的分析函数的作用范围是分组内的数据【**此时相当于group by + 聚合函数函数，如 monthSum1**】。     
+- 使用了order by子句，默认数据分析范围是从起点到当前行，往往用来实现累加.  
 
 #### 3）查询顾客的购买明细及到目前为止每个顾客购买总金额
 ```hql
@@ -649,4 +649,64 @@ https://blog.csdn.net/licent2011/article/details/121370208
 2、统计每个活动从开始后到当天（数据统计日）平均每天产生的订单数，活动开始时间定义为最早有用户报名的时间。      
 ```hql
 
+```
+
+## 第八题 计算用户累计成单达到一定金额的时间
+订单表：order_t
+字段：
+orderid
+userid
+paidtime
+paidfee
+请使用hive sql计算用户累计成单达到一定金额的时间
+输出：userid, keypoint, keypoint_time
+keypoint：>1000, >2000, >5000
+```hql
+源表：
++-------+------+----------+-------+
+|orderid|userid|  paidtime|paidfee|
++-------+------+----------+-------+
+|      1|     a|2021-04-05|    200|
+|      2|     a|2021-04-06|    200|
+|      3|     a|2021-04-07|    100|
+|      4|     a|2021-04-08|    400|
+|      4|     a|2021-04-09|    200|
+|      4|     a|2021-04-10|    800|
+|      5|     a|2021-04-11|    300|
+|      6|     a|2021-04-12|   3000|
+|      6|     a|2021-04-13|   4000|
++-------+------+----------+-------+
+目标表：
++------+--------+-------------+
+|userid|keypoint|keypoint_time|
++------+--------+-------------+
+|     a|   >1000|   2021-04-09|
+|     a|   >2000|   2021-04-11|
+|     a|   >5000|   2021-04-12|
++------+--------+-------------+
+```
+
+```hql
+select userid,
+       keypoint,
+       min(paidtime) keypoint_time
+from (
+         select userid,
+                orderid,
+                paidtime,
+                (case
+                     when cur_sum >= 1000 and cur_sum < 2000 then '>1000'
+                     when cur_sum >= 2000 and cur_sum < 5000 then '>2000'
+                     else '>5000' end) as keypoint
+         from (
+                  select userid,
+                         orderid,
+                         paidtime,
+                         sum(paidfee) over (partition by userid order by paidtime asc) cur_sum
+                  from order_t
+              ) tmp
+         where cur_sum >= 1000
+     ) tt
+where keypoint in ('>1000', '>2000', '>5000')
+group by userid, keypoint
 ```

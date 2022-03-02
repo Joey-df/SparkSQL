@@ -13,6 +13,21 @@ object SQL_开窗函数练习题若干道_1 {
       .getOrCreate()
     ss.sparkContext.setLogLevel("ERROR")
 
+    //name,orderdate,cost
+    //jack,2017-01-01,10
+    //tony,2017-01-02,15
+    //jack,2017-02-03,23
+    //tony,2017-01-04,29
+    //jack,2017-01-05,46
+    //jack,2017-04-06,42
+    //tony,2017-01-07,50
+    //jack,2017-01-08,55
+    //mart,2017-04-08,62
+    //mart,2017-04-09,68
+    //neil,2017-05-10,12
+    //mart,2017-04-11,75
+    //neil,2017-06-12,80
+    //mart,2017-04-13,94
     ss.read.option("header", true).csv("./data/business.csv")
       .createTempView("business")
 
