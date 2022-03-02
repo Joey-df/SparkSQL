@@ -46,8 +46,47 @@ object SQL_开窗函数练习题若干道_6 {
         |select * from user_log
         |""".stripMargin).show()
 
-    //todo
+    //第1问
+    ss.sql(
+      """
+        |select substring(event_time, 1, 10) as           date,
+        |       count(distinct user_id)                   user_cnt,   -- 每天的访客数
+        |       count(event_id) / count(distinct user_id) avg_opr_cnt -- 每天人均行为次数
+        |from user_log
+        |group by substring(event_time, 1, 10)
+        |""".stripMargin)
+      .show()
 
+    //或者
+    ss.sql(
+      """
+        |select cast(event_time as date)                  as day,
+        |       count(distinct user_id)                   as active_cnt,
+        |       count(event_id) / count(distinct user_id) as avg_opr_cnt
+        |from user_log
+        |group by cast(event_time as date)
+        |""".stripMargin)
+        .show()
+
+
+    //第2问
+    ss.sql(
+      """
+        |select date,
+        |       count(distinct user_id)
+        |from (
+        |         select user_id,
+        |                substring(event_time, 1, 10) as                                           date,
+        |                event_time,
+        |                event_id,
+        |                lead(event_id, 1, null)
+        |                     over (partition by substring(event_time, 1, 10) order by event_time) next_event_id
+        |         from user_log
+        |     ) tmp
+        |where event_id = 'register' and next_event_id = 'gift'
+        |group by date
+        |""".stripMargin)
+      .show()
   }
 
 }

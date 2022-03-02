@@ -590,11 +590,56 @@ https://blog.csdn.net/licent2011/article/details/121370208
 需求：      
 1、计算该app每天的访客数、以及每天人均行为次数。    
 ```hql
+计算app每天的访客数，因为用户登录访问app就会在表中产生对应的行为日志，所以每天的访客数只需要按天对用户数去重即可，
+每天人均行为次数的计算，因为一次行为就会产生一条记录，所以，人均行为次数就是所有的记录计数，除以总的访客数。
+select substring(event_time, 1, 10) as           date,
+       count(distinct user_id)                   user_cnt,   -- 每天的访客数
+       count(event_id) / count(distinct user_id) avg_opr_cnt -- 每天人均行为次数
+from user_log
+group by substring(event_time, 1, 10);
 
+或者：
+select cast(event_time as date)                  as day,
+       count(distinct user_id)                   as active_cnt,
+       count(event_id) / count(distinct user_id) as avg_opr_cnt
+from user_log
+group by cast(event_time as date);
+
+结果：
++----------+--------+-----------+
+|      date|user_cnt|avg_opr_cnt|
++----------+--------+-----------+
+|2021-01-01|       1|        2.0|
+|2021-01-02|       1|        4.0|
+|2021-01-03|       1|        4.0|
++----------+--------+-----------+
 ```  
 2、统计每天签到之后并进行抽奖的用户数，注意签到和抽奖行为必须相邻（签到和抽奖行为对应的event_id分别为'register','gift'）。 
 ```hql
+虽然也是统计用户数，但是添加了限制：签到之后要大转盘抽奖，两个行为一前一后必须相邻才可以。
+这个时候我们可以用窗口函数的位移函数lead（）over（）实现，lead可以取当前记录的下一条记录，
+如果我们对每个用户user_id分组，按照行为时间event_time升序排列，就可以得到一个用户的连续的行为记录，
+再用lead（）就可以得到下一条记录，从而在当前记录中得到下一条记录，对两个连续行为进行筛选，就可以计算满足这个条件的用户数。
+select date,
+       count(distinct user_id)
+from (
+         select user_id,
+                substring(event_time, 1, 10) as                                           date,
+                event_time,
+                event_id,
+                lead(event_id, 1, null)
+                     over (partition by substring(event_time, 1, 10) order by event_time) next_event_id
+         from user_log
+     ) tmp
+where event_id = 'register' and next_event_id = 'gift'
+group by date;
 
+结果：
++----------+-----------------------+
+|      date|count(DISTINCT user_id)|
++----------+-----------------------+
+|2021-01-02|                      1|
++----------+-----------------------+
 ```           
 
 
