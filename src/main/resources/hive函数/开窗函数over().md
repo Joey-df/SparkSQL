@@ -31,6 +31,7 @@ PARTITION BY：partition by可理解为group by 分组。over(partition by 列�
 ORDER BY：将每个partition by分组内的数据（即窗口），根据window_ordering（排序字段）进行排序。  
     ORDER BY子句会对输入的数据强制排序（~~窗口函数是SQL语句最后执行的函数~~，因此可以把SQL结果集想象成输入数据）。  
     ORDER BY子句对于诸如row_number()，lead()，lag()等函数是必须的。如果数据无序，这些函数的结果就没有意义。  
+    如果只使用partition by子句，未指定order by的话，我们的分析函数的作用范围是分组内的数据【**此时相当于group by + 聚合函数**】。
 ROWS BETWEEN 开始位置 AND 结束位置：   
 窗口范围说明：   
 我们常使用的窗口范围是ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW（表示从起点到当前行），常用该窗口来计算累加。 
