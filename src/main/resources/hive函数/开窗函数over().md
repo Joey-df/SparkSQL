@@ -399,7 +399,7 @@ NTILE不支持ROWS BETWEEN，比如NTILE(2) OVER(PARTITION BY dept_no ORDER BY s
 SELECT name,
        dept_no,
        salary,
-       ntile(2) over (order by salary)                      n1,-- 全局按照salary升序排列，数据切成3份
+       ntile(2) over (order by salary)                      n1, -- 全局按照salary升序排列，数据切成2份
        ntile(2) over (partition by dept_no order by salary) n2, -- 按照dept_no分组，在分组内按照salary升序排列,数据切成2份
        ntile(3) over (partition by dept_no order by salary) n3 -- 按照dept_no分组，在分组内按照salary升序排列,数据切成3份
 FROM data;

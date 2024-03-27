@@ -54,22 +54,20 @@ SELECT null, null, SUM( c ) FROM tab1
 CUBE是生成group by后的字段集合所有的子序列。   
 一旦我们在一组维度上计算一个CUBE，我们就可以得到这些维度所有子序列group by结果的全集。
 ```hql
-SELECT null, b, SUM( c ) FROM tab1 GROUP BY a, b, c WITH CUBE;
+GROUP BY a, b, c WITH CUBE;
 
 等价于
 
-SELECT null, b, SUM( c ) FROM tab1 GROUP BY a, b, c 
-GROUPING SETS ( (a, b, c), (a, b), (b, c), (a, c), (a), (b), (c), ( )).
+GROUP BY a, b, c GROUPING SETS ( (a, b, c), (a, b), (b, c), (a, c), (a), (b), (c), ( )).
 ```
 
 ### ROLLUP
 ROLLUP子句与group by一起用于计算维度层次结构级别上的聚合。
 使用ROLLUP的GROUP BY a、b、c，假设层次结构是“a”，向下钻取到“b”，向下钻取到“c”。
 ```hql
-SELECT null, b, SUM( c ) FROM tab1 GROUP BY a, b, c, WITH ROLLUP;
+GROUP BY a, b, c, WITH ROLLUP;
 
-is equivalent to 
+等价于 
 
-SELECT null, b, SUM( c ) FROM tab1 GROUP BY a, b, c 
-GROUPING SETS ( (a, b, c), (a, b), (a), ( )).
+GROUP BY a, b, c GROUPING SETS ( (a, b, c), (a, b), (a), ( )).
 ```

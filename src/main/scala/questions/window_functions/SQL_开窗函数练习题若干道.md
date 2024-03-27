@@ -72,7 +72,7 @@ group by name;
 ④ 查询在2017年4月份购买过的顾客及总人数
 ```hql
 select name,
-       count(*) over
+       count(*) over ()
 from business
 where substring(orderdate, 1, 7) = '2017-04'
 group by name;
@@ -83,7 +83,7 @@ group by name;
 |jack|                                                                       2|
 |mart|                                                                       2|
 +----+------------------------------------------------------------------------+
--- sql的执行顺序：form、where、group by、select、count(*) over() //可以理解为over()是在select之后执行的，最后执行的。
+-- sql的执行顺序：from、where、group by、select、count(*) over() //可以理解为over()是在select之后执行的，最后执行的。
 ```
 ③ 和 ④ 的结果差异的原因，主要在于sql执行顺序。  
 开窗函数over() 遇到 group by语句，是在group by去重之后的结果集之上，进行开窗的。  
@@ -652,7 +652,7 @@ https://blog.csdn.net/licent2011/article/details/121370208
 为了提高某店铺的营业额，最近运营部门上线了多个运营活动，用户参与活动后可以领取不定额的优惠券，以此鼓励用户下单。但每个用户限参与一个活动，不可同时参与多个活动。   
 数据表介绍   
 现有一张订单表orders和活动报名表act_join,分别记录了用户的下单明细和用户报名的活动明细。具体字段如下：   
-订单表orders，大概字段有（user_id '用户编号',order_id '订单编号' ，order_sales '订单金额', order_time '下单时间'）。  
+订单表orders，大概字段有（user_id '用户编号',order_id'订单编号' ，order_sales '订单金额', order_time '下单时间'）。  
 ```hql
 +-------+---------+-----------+-------------------+
 |user_id| order_id|order_sales|         order_time|
