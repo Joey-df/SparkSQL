@@ -557,7 +557,44 @@ where rn <= 3;
 思路：   
 本题的难点在于需要构造一个可以相减的字段字段，这也是与3天连续登录问题的区别之处。
 ```hql
+第一步：
+select *,
+    row_number() over( order by score_time) as rn_all,
+    row_number() over( partition by user_id order by score_time) as rn_user
+from score_info;
 
+结果：
++-------+----------+-----+------+-------+
+|user_id|score_time|score|rn_all|rn_user|
++-------+----------+-----+------+-------+
+|  A0001|        t1|    2|     1|      1|
+|  A0001|        t2|    2|     2|      2|
+|  A0001|        t4|    2|     4|      3|
+|  A0001|        t5|    2|     5|      4|
+|  A0001|        t6|    2|     6|      5|
+|  A0002|        t3|    3|     3|      1|
+|  A0003|        t7|    3|     7|      1|
+|  A0003|        t8|    2|     8|      2|
++-------+----------+-----+------+-------+
+
+第二步：
+select user_id, diff, count(1)
+from (select *, rn_all - rn_user as diff
+      from (select *,
+                row_number() over( order by score_time) as rn_all,
+                row_number() over( partition by user_id order by score_time) as rn_user
+            from score_info
+            ) a
+      ) b
+group by user_id, diff
+having count(1) >= 3;
+
+结果：
++-------+----+--------+
+|user_id|diff|count(1)|
++-------+----+--------+
+|  A0001|   1|       3|
++-------+----+--------+
 ```
 
 ## 第六题 用户抽奖行为分析
