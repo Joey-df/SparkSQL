@@ -38,7 +38,7 @@ object SQL_行转列4 {
       ("产品A", "JD", 87),
       ("产品B", "JD", 98),
       ("产品C", "JD", 93)
-    ).toDF("Product","Platform","Quantity")
+    ).toDF("product","platform","quantity")
 
 
     df1.createTempView("table_source")
@@ -49,10 +49,30 @@ object SQL_行转列4 {
       .show()
 
     //方法1 str_to_map + concat_ws + collect_list
+    ss.sql(
+      """
+        |select product,
+        |       nvl(map['Tamll'], 0)     as tm,
+        |       nvl(map['taobao'], 0)    as tb,
+        |       nvl(map['JD'], 0)        as jd
+        |from (select product,
+        |             str_to_map(concat_ws(',', collect_list(concat(platform, ':', cast(quantity as string)))), ',', ':') as map
+        |      from table_source
+        |      group by product
+        |     ) t
+        |""".stripMargin).show()
 
     //方法2 if 或 case when
+    ss.sql(
+      """
+        |select product,
+        |       sum(if(platform='Tamll', quantity, 0)) as Tamll,
+        |       sum(if(platform='taobao', quantity, 0)) as taobao,
+        |       sum(if(platform='JD', quantity, 0)) as jd
+        |from table_source
+        |group by product
+        |""".stripMargin).show()
 
-    //todo
   }
 
 }

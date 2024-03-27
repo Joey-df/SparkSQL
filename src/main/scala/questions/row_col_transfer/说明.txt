@@ -1,2 +1,4 @@
 【数据分析面试】大厂高频SQL笔试题（一）
 https://www.jianshu.com/p/d1f775fd5e8b
+
+问题2和问题4是同一个问题

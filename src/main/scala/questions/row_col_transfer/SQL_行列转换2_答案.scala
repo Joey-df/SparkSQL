@@ -42,6 +42,14 @@ object SQL_行列转换2_答案 {
         |""".stripMargin)
       .show()
 
+    ss.sql(
+      """
+        |select name,
+        |       map("english", english, "maths", maths, "music", music) mp
+        |    from tableA
+        |""".stripMargin)
+      .show()
+
     ///////////////////列转行（一行变多行）//////////////////////
     //方法1：使用union
     ss.sql(

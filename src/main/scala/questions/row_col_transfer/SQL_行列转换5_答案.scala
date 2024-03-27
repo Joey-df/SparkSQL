@@ -26,7 +26,7 @@ object SQL_行列转换5_答案 {
       ("产品C","sup_2"),
       ("产品C","sup_3"),
       ("产品C","sup_4")
-    ).toDF("Product","Supplier")
+    ).toDF("product","supplier")
 
     df1.createTempView("tableA")
     ss.sql(
@@ -35,21 +35,14 @@ object SQL_行列转换5_答案 {
         |""".stripMargin)
       .show()
 
-    //todo
-//    //方法1：使用union
-//    ss.sql(
-//      """
-//        |
-//        |""".stripMargin)
-//      .show()
-//
-//    //方法2：使用explode函数
-//    ss.sql(
-//      """
-//        |
-//        |""".stripMargin)
-//      .show()
-
+    // udaf
+    ss.sql(
+      """
+        |select product,
+        |       concat_ws(',', collect_list(supplier)) as suppliers
+        |from tableA
+        |group by product
+        |""".stripMargin).show()
 
 
 
@@ -58,7 +51,7 @@ object SQL_行列转换5_答案 {
       ("产品A","sup_1,sup_2,sup_3"),
       ("产品B","sup_1,sup_2,sup_4"),
       ("产品C","sup_2,sup_3,sup_4")
-    ).toDF("Product","Supplier")
+    ).toDF("product","suppliers")
 
     df2.createTempView("tableB")
     ss.sql(
@@ -67,7 +60,14 @@ object SQL_行列转换5_答案 {
         |""".stripMargin)
       .show()
 
-    //todo
+    //udtf
+    ss.sql(
+      """
+        |select product,
+        |       supplier
+        |from tableB
+        |lateral view explode(split(suppliers, ',')) as supplier
+        |""".stripMargin).show()
   }
 
 }
