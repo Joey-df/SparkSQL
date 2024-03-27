@@ -36,6 +36,7 @@ object SQL_lateral_view_explode_有无outer的区别 {
         |from user_info lateral view explode(split(favs, ",")) tf as fav
         |""".stripMargin).show()
 
+    // le和fa的笛卡尔积
     ss.sql(
       """
         |select name,
@@ -49,6 +50,7 @@ object SQL_lateral_view_explode_有无outer的区别 {
         |         lateral view explode(split(favs, ",")) tf2 as fa
         |""".stripMargin).show()
 
+    //不加outer，如果explode的字段为空，则整行为空
     ss.sql(
       """
         |select name,
@@ -60,6 +62,7 @@ object SQL_lateral_view_explode_有无outer的区别 {
         |         lateral view explode(array()) tf1 as col
         |""".stripMargin).show()
 
+    //加outer，如果explode的字段为空，炸裂的出字段用null填充，其他字段正常输出
     ss.sql(
       """
         |select name,

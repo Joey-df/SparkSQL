@@ -24,7 +24,7 @@ object Problem_posexplode_1_生成指定区间的所有日期 {
         |       '2020-11-30'                as end_time
         |from (select 0) t
         |         lateral view
-        |             posexplode(split(space(datediff('2020-11-30', '2020-11-01')), ' ')) tf as pos, x
+        |             posexplode(split(repeat('0', datediff('2020-11-30', '2020-11-01')), '0')) tf as pos, x
         |""".stripMargin).show(100)
 
 

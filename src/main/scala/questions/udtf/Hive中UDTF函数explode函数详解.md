@@ -11,7 +11,7 @@ Hive中的函数分为3类：UDF函数、UDAF函数、UDTF函数
 3. UDTF：一进多出,如explore()、posexplode()，UDTF函数的时候只允许一个字段 **（列转行 一行变多行）**
 
 当我们百度搜索explode()时，经常会出现lateral view + explode相关的文章，很少单独写explode()。  
-分别了解ecplode() 与lateral view的各自作用很重要，不然过程都不知道实现的，换个UDTF函数就不会使用了。  
+分别了解explode() 与lateral view的各自作用很重要，不然过程都不知道实现的，换个UDTF函数就不会使用了。  
 而大部分文章都是explode()与lateral view一起讲解，当我们都不会使用UDTF函数时，不理解该类函数时，不知道仅UDTF函数如何使用、我们也不会真正的使用。  
 
 所以先看第一部分吧。

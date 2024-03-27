@@ -66,7 +66,7 @@ object SQL_行列转换5_答案 {
         |select product,
         |       supplier
         |from tableB
-        |lateral view explode(split(suppliers, ',')) as supplier
+        |lateral view explode(split(suppliers, ',')) tf as supplier
         |""".stripMargin).show()
   }
 
