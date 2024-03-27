@@ -6,7 +6,7 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 //为了提高某店铺的营业额，最近运营部门上线了多个运营活动，用户参与活动后可以领取不定额的优惠券，以此鼓励用户下单。但每个用户限参与一个活动，不可同时参与多个活动。
 //数据表介绍
 //现有一张订单表orders和活动报名表act_join,分别记录了用户的下单明细和用户报名的活动明细。具体字段如下：
-//订单表orders，大概字段有（user_id '用户编号',order_id '订单编号' ，order_sales '订单金额', order_time '下单时间'）。
+//订单表orders，大概字段有（user_id '用户编号',order_id'订单编号' ，order_sales '订单金额', order_time '下单时间'）。
 //活动报名表act_join，大概字段有（act_id '活动编号', user_id '报名用户', join_time '报名时间'）
 //
 //需求：

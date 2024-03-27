@@ -86,7 +86,7 @@ object SQL_连续登录天数超过3天的用户 {
         |                   FROM login_info
         |               ) t1
         |          where datediff(login_date, lag_login_date) = 1
-        |            and datediff(lead_login_date, login_date) = 1
+        |            and datediff(lead_login_date, login_date) = 1 -- 这两个条件刚好限制了连续3天
         |      ) tmp
         | group by user_id
         |""".stripMargin)

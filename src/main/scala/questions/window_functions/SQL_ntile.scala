@@ -40,6 +40,7 @@ object SQL_ntile {
 
     df1.createTempView("data")
 
+    // ntile
     ss.sql(
       """
         |SELECT name, dept_no, salary,
@@ -49,5 +50,40 @@ object SQL_ntile {
         |FROM data
         |""".stripMargin)
       .show()
+
+    // fisrt_val
+    ss.sql(
+    """
+      |select name,
+      |       dept_no,
+      |       salary,
+      |       first_value(salary) over(partition by dept_no order by salary asc) as fv
+      |from data
+      |""".stripMargin
+    ).show()
+
+    //last_value
+    ss.sql(
+      """
+        |select name,
+        |       dept_no,
+        |       salary,
+        |       last_value(salary) over(partition by dept_no order by salary asc rows between unbounded preceding and unbounded following) as fv
+        |from data
+        |""".stripMargin
+    ).show()
+
+    //lead lag
+    ss.sql(
+      """
+        |select name,
+        |       dept_no,
+        |       salary,
+        |       lead(salary, 1, -1) over(partition by dept_no order by salary asc) as lead,
+        |       lag(salary, 1, -2) over(partition by dept_no order by salary asc) as lag
+        |from data
+        |""".stripMargin
+    ).show()
+
   }
 }

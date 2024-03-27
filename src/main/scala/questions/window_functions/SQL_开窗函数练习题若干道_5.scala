@@ -38,7 +38,28 @@ object SQL_开窗函数练习题若干道_5 {
         |select * from score_info
         |""".stripMargin).show()
 
-    //todo
+    //debug
+    ss.sql(
+      """
+        |select *,
+        |    row_number() over( order by score_time) as rn_all,
+        |    row_number() over( partition by user_id order by score_time) as rn_user
+        |from score_info
+        |""".stripMargin).show()
+
+    ss.sql(
+      """
+        |select user_id, diff, count(1)
+        |from (select *, rn_all - rn_user as diff
+        |      from (select *,
+        |                row_number() over( order by score_time) as rn_all,
+        |                row_number() over( partition by user_id order by score_time) as rn_user
+        |            from score_info
+        |            ) a
+        |      ) b
+        |group by user_id, diff
+        |having count(1) >= 3
+        |""".stripMargin).show()
   }
 
 }

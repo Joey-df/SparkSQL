@@ -60,7 +60,8 @@ object SQL_按月统计销售额 {
         |    date,
         |    sum(sale) over( partition by month(date) order by date) as cur_sum,
         |    sum(sale) over( partition by substr(date,1,7) order by date) as cur_sum2,
-        |    sum(sale) over( partition by substring(date,1,7) order by date) as cur_sum3
+        |    sum(sale) over( partition by substring(date,1,7) order by date) as cur_sum3,
+        |    sum(sale) over( partition by substring(date,1,7) order by date asc rows between unbounded preceding and current row) as cur_sum4
         | from sale_info
         |""".stripMargin)
       .show()

@@ -65,8 +65,8 @@ object SQL_开窗函数练习题若干道_8 {
         |                orderid,
         |                paidtime,
         |                (case
-        |                     when cur_sum >= 1000 and cur_sum < 2000 then '>1000'
-        |                     when cur_sum >= 2000 and cur_sum < 5000 then '>2000'
+        |                     when cur_sum > 1000 and cur_sum < 2000 then '>1000'
+        |                     when cur_sum > 2000 and cur_sum < 5000 then '>2000'
         |                     else '>5000' end) as keypoint
         |         from (
         |                  select userid,
@@ -75,7 +75,7 @@ object SQL_开窗函数练习题若干道_8 {
         |                         sum(paidfee) over (partition by userid order by paidtime asc) cur_sum
         |                  from order_t
         |              ) tmp
-        |         where cur_sum >= 1000
+        |         where cur_sum > 1000
         |     ) tt
         |where keypoint in ('>1000', '>2000', '>5000')
         |group by userid, keypoint

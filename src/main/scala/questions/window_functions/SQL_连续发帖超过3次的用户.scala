@@ -44,6 +44,7 @@ object SQL_连续发帖超过3次的用户 {
         |       count(1) as times
         |from (
         |         select user_id,
+        |                post_time,
         |                unix_timestamp(post_time, "yyyy-MM-dd HH:mm:ss")            as postTime,
         |                row_number() over (partition by user_id order by post_time) as rn
         |         from log_info
@@ -53,6 +54,14 @@ object SQL_连续发帖超过3次的用户 {
         |""".stripMargin)
       .show()
 
+    ss.sql(
+      """
+        |select user_id,post_time,
+        |       unix_timestamp(post_time, "yyyy-MM-dd HH:mm:ss")            as postTime,
+        |       row_number() over (partition by user_id order by rand()) as rn
+        |from log_info
+        |""".stripMargin)
+      .show()
   }
 
 }
