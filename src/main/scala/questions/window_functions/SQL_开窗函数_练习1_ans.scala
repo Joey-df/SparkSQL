@@ -57,7 +57,9 @@ object SQL_开窗函数_练习1_ans {
       """
         |select fyear, fmonth, value,
         |       sum(value) over(partition by fyear order by fmonth) as ysum,
-        |       sum(value) over(rows between unbounded preceding and current row) as sum
+        |       sum(value) over (order by fyear, fmonth) sum_1,
+        |       sum(value) over(order by concat(fyear,'-',fmonth)) as sum_2,
+        |       sum(value) over(rows between unbounded preceding and current row) as sum -- 与上面两个相同
         |from (
         |         select fyear, fmonth, sum(val) as value
         |         from (
@@ -72,25 +74,5 @@ object SQL_开窗函数_练习1_ans {
         |""".stripMargin)
       .show()
 
-
-    //第二问的另一种方法
-    ss.sql(
-      """
-        |select fyear, fmonth, value,
-        |       sum(value) over(partition by fyear order by fmonth) as ysum,
-        |       sum(value) over(order by concat(fyear,'-',fmonth)) as sum  -- 使用了order by子句，默认数据分析范围是从起点到当前行，往往用来实现累加.
-        |from (
-        |         select fyear, fmonth, sum(val) as value
-        |         from (
-        |                  select year(regexp_replace(fdate, '/', '-'))  fyear,
-        |                         month(regexp_replace(fdate, '/', '-')) fmonth,
-        |                         value as                               val
-        |                  from sale_info
-        |                  order by fyear, fmonth
-        |              ) t0
-        |         group by fyear, fmonth
-        |     ) t1
-        |""".stripMargin)
-      .show()
   }
 }
